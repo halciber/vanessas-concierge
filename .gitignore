@@ -1,0 +1,13 @@
+# OS / editor artifacts
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+
+# Local secrets (never commit API keys)
+*.secret
+.env

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanessa's Concierge</title>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css?v=1.8">
+</head>
+<body>
+
+  <!-- LEFT NAVIGATION SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <h1 class="brand-title">Vanessa's Concierge</h1>
+      <p class="brand-subtitle">Gentle Workflow</p>
+    </div>
+    
+    <nav class="nav-links">
+      <li class="nav-item active" data-page="home">
+        <button class="nav-btn">
+          <i data-lucide="sun"></i>
+          Vanessa's Day
+        </button>
+      </li>
+      <li class="nav-item" data-page="journal">
+        <button class="nav-btn">
+          <i data-lucide="book-open"></i>
+          Daily Journal
+        </button>
+      </li>
+      <li class="nav-item" data-page="expenses">
+        <button class="nav-btn">
+          <i data-lucide="credit-card"></i>
+          Expense Report
+        </button>
+      </li>
+      <li class="nav-item" data-page="billing">
+        <button class="nav-btn">
+          <i data-lucide="bar-chart-2"></i>
+          Billing Generator
+        </button>
+      </li>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <li class="nav-item" data-page="settings" style="list-style: none;">
+        <button class="nav-btn">
+          <i data-lucide="settings"></i>
+          Configuration
+        </button>
+      </li>
+    </div>
+  </aside>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="main-content theme-home" id="main-content-area">
+
+    <!-- Demo Mode Banner -->
+    <div class="demo-banner" id="demo-mode-banner" style="display: flex;">
+      <i data-lucide="info"></i>
+      <span>Running in <strong>Demo Mode (Mock Data)</strong>. Changes are temporary. <a href="#" id="banner-login-link">Sign In</a> to sync with Vanessa's secure cloud database.</span>
+    </div>
+
+    <!-- PAGE 1: VANESSA'S DAY (DASHBOARD) -->
+    <section class="page active" id="page-home">
+      <div class="page-header">
+        <h2 class="page-title">Vanessa's Day</h2>
+      </div>
+      
+      <!-- Top Grid -->
+      <div class="dashboard-grid">
+        <!-- Schedule Column -->
+        <div class="card">
+          <h3 class="card-title">
+            <i data-lucide="calendar"></i>
+            Today's Schedule
+            <span style="margin-left: auto; font-size: 0.85rem; color: var(--text-muted);" id="today-date-str">Oct 24</span>
+          </h3>
+          <div class="schedule-list" id="dashboard-schedule">
+            <!-- Dynamic elements loaded here -->
+          </div>
+        </div>
+        
+        <!-- Daily Routine Column -->
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 20px;">
+            <i data-lucide="sparkles" style="color: var(--tertiary);"></i>
+            Daily Routine
+          </h3>
+          <div class="routine-grid">
+            <div class="routine-item">
+              <div class="routine-icon"><i data-lucide="bath"></i></div>
+              <div class="routine-details">
+                <div class="routine-title">Hygiene</div>
+                <div class="routine-status" id="routine-hygiene-status">In progress</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar" style="width: 60%;" id="routine-hygiene-bar"></div>
+                </div>
+              </div>
+            </div>
+            <div class="routine-item">
+              <div class="routine-icon" style="background-color: rgba(102, 89, 120, 0.08); color: var(--secondary);"><i data-lucide="paw-print"></i></div>
+              <div class="routine-details">
+                <div class="routine-title">Pet Care</div>
+                <div class="routine-status" id="routine-pet-status">Fed & Walked</div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar" style="width: 100%; background-color: var(--secondary);" id="routine-pet-bar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tasks Column -->
+        <div class="card">
+          <h3 class="card-title">
+            <i data-lucide="check-square"></i>
+            To-Do Items
+          </h3>
+          <div class="task-list" id="dashboard-tasks">
+            <!-- Dynamic tasks list -->
+          </div>
+          <div style="margin-top: 24px; display: flex; gap: 8px;">
+            <input type="text" class="form-input" id="quick-task-input" placeholder="New task..." style="flex-grow: 1; padding: 8px 12px; font-size: 0.9rem;">
+            <button class="btn btn-primary" id="quick-task-add-btn" style="padding: 8px 16px; border-radius: var(--rounded-md);"><i data-lucide="plus"></i></button>
+          </div>
+        </div>
+
+        <!-- Reminders Column -->
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 16px;">
+            <i data-lucide="alert-circle" style="color: var(--error);"></i>
+            Reminders
+          </h3>
+          <div class="reminders-list" id="dashboard-reminders">
+            <!-- Dynamic reminders -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Upcoming Row -->
+      <h3 class="upcoming-section-title">Upcoming</h3>
+      <div class="upcoming-grid" id="dashboard-upcoming">
+        <!-- Dynamic upcoming cards -->
+      </div>
+    </section>
+
+    <!-- PAGE 2: DAILY JOURNAL -->
+    <section class="page" id="page-journal">
+      <div class="page-header">
+        <h2 class="page-title">Daily Journal</h2>
+      </div>
+
+      <div class="journal-layout" id="journal-entry-view">
+        <!-- Sidebar Column: Past Entries -->
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 20px;"><i data-lucide="history"></i> Past Journals</h3>
+          <div class="journal-sidebar-list" id="journal-sidebar-list">
+            <!-- Dynamic past entries loaded here -->
+          </div>
+        </div>
+
+        <!-- Editor Column: Current Entry -->
+        <div class="journal-editor-column" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
+          <!-- Date Warning Banner -->
+          <div class="warning-banner" id="journal-date-warning-banner" style="display: none; align-items: center; justify-content: space-between; padding: 12px 20px; background-color: #fef3c7; border-left: 4px solid #d97706; border-radius: var(--rounded-md); color: #92400e; font-size: 0.9rem; font-weight: 500;">
+            <span style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="alert-triangle" style="width: 18px; height: 18px; color: #d97706; flex-shrink: 0;"></i>
+              <span>You are viewing a past journal entry for <strong id="journal-warning-date-text"></strong>.</span>
+            </span>
+            <button class="btn btn-secondary" id="journal-warning-reset-btn" style="padding: 4px 12px; font-size: 0.8rem; background-color: #ffffff; border-color: #d97706; color: #b45309; cursor: pointer; border-radius: var(--rounded-sm);">Switch to Today</button>
+          </div>
+
+          <!-- Rich Text Editor Card -->
+          <div class="card">
+            <div class="editor-toolbar">
+              <button class="toolbar-btn" onclick="document.execCommand('bold', false, '')" title="Bold"><i data-lucide="bold"></i></button>
+              <button class="toolbar-btn" onclick="document.execCommand('italic', false, '')" title="Italic"><i data-lucide="italic"></i></button>
+              <button class="toolbar-btn" onclick="document.execCommand('insertUnorderedList', false, '')" title="List"><i data-lucide="list"></i></button>
+              <button class="toolbar-btn" id="editor-image-btn" title="Add Image"><i data-lucide="image"></i></button>
+              <span style="margin-left: auto; font-weight: 600; color: var(--text-muted);" id="journal-current-date">Monday, October 23rd</span>
+            </div>
+            <div class="rich-editor" contenteditable="true" id="journal-text-editor" placeholder="Start writing your thoughts for today..."></div>
+          </div>
+
+          <!-- Work Log Card -->
+          <div class="card">
+            <h3 class="card-title">Work Log Details</h3>
+            <div class="work-log-grid">
+              <div class="form-group">
+                <label class="form-label" for="work-client">Client</label>
+                <input type="text" class="form-input" id="work-client" value="John Doe" placeholder="Client Name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="work-start-time">Start Time</label>
+                <input type="time" class="form-input" id="work-start-time">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="work-end-time">End Time</label>
+                <input type="time" class="form-input" id="work-end-time">
+              </div>
+              <div class="form-group" style="flex-grow: 1;">
+                <label class="form-label" for="work-mileage">Mileage</label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="number" class="form-input" id="work-mileage" step="1" value="0" style="flex-grow: 1;">
+                  <span class="form-label" style="font-weight: 700;">mi</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 24px; display: flex; align-items: center;">
+              <span class="form-label" style="font-size: 0.95rem;">Calculated Units:</span>
+              <span class="form-badge" id="work-units-badge" style="margin-left: 12px;">0</span>
+            </div>
+          </div>
+
+          <!-- Standalone Save/Action Button Row -->
+          <div class="journal-save-wrap" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+            <button class="btn btn-secondary" id="journal-clear-btn" style="padding: 12px 24px; font-size: 1rem; border-radius: var(--rounded-md); display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); background-color: transparent;">
+              <i data-lucide="plus"></i> New Entry
+            </button>
+            <button class="btn btn-primary" id="journal-save-btn" style="padding: 12px 28px; font-size: 1rem; border-radius: var(--rounded-md); display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="save"></i> Save Journal Entry
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- PAGE 3: EXPENSE REPORT -->
+    <section class="page" id="page-expenses">
+      <div class="page-header">
+        <h2 class="page-title">Expense Report</h2>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="expense-grid">
+        <div class="card">
+          <div class="expense-stat-sub">Total This Week</div>
+          <div class="expense-stat-value" id="expense-total-week">$0.00</div>
+          <div class="expense-stat-sub alert" id="expense-due-alert">
+            <i data-lucide="clock"></i> No current deadlines
+          </div>
+        </div>
+        <div class="card">
+          <div class="expense-stat-sub">Total This Month</div>
+          <div class="expense-stat-value" id="expense-total-month">$0.00</div>
+          <div class="expense-stat-sub" id="expense-budget-percentage">0% of monthly budget</div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: 0%;" id="expense-budget-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction Table Card -->
+      <div class="card">
+        <div class="table-header-wrap">
+          <h3 class="card-title" style="margin-bottom: 0;">Recent Entries</h3>
+          <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="Pending">Pending</button>
+            <button class="filter-btn" data-filter="Paid">Paid</button>
+            <button class="btn btn-primary" id="expense-add-btn" style="padding: 8px 16px;"><i data-lucide="plus"></i> Add Expense</button>
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body">
+              <!-- Expense rows loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <span id="expenses-counter-text">Showing 0 transactions</span>
+          <div class="pagination">
+            <button class="pagination-btn"><i data-lucide="chevron-left"></i></button>
+            <button class="pagination-btn"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 4: BILLING GENERATOR -->
+    <section class="page" id="page-billing">
+      <div class="page-header">
+        <h2 class="page-title">Billing Report Generator</h2>
+      </div>
+
+      <div class="billing-grid">
+        <!-- Date Selector Card -->
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 12px;">Select the dates to bill for</h3>
+          
+          <div class="calendar-select-row">
+            <!-- Left Month Calendar -->
+            <div class="date-picker-card">
+              <div class="calendar-header">
+                <button class="calendar-nav-btn" id="billing-cal-prev"><i data-lucide="chevron-left"></i></button>
+                <span id="billing-month-name-1">September 2023</span>
+                <span></span>
+              </div>
+              <div class="calendar-days">
+                <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+              </div>
+              <div class="calendar-grid" id="billing-calendar-grid-1">
+                <!-- Dynamically populated dates -->
+              </div>
+            </div>
+
+            <!-- Right Month Calendar -->
+            <div class="date-picker-card">
+              <div class="calendar-header">
+                <span></span>
+                <span id="billing-month-name-2">October 2023</span>
+                <button class="calendar-nav-btn" id="billing-cal-next"><i data-lucide="chevron-right"></i></button>
+              </div>
+              <div class="calendar-days">
+                <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+              </div>
+              <div class="calendar-grid" id="billing-calendar-grid-2">
+                <!-- Dynamically populated dates -->
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+            <span id="billing-range-selection-text" style="align-self: center; font-weight: 600; color: var(--text-muted); margin-right: 16px;">No range selected</span>
+            <button class="btn btn-secondary" id="billing-clear-range-btn">Clear Range</button>
+            <button class="btn btn-primary" id="billing-compile-btn"><i data-lucide="refresh-cw"></i> Compile Report</button>
+          </div>
+        </div>
+
+        <!-- Compiled Report Card (Displayed after compilation) -->
+        <div class="card" id="compiled-report-card" style="display: none;">
+          <div class="table-header-wrap">
+            <h3 class="card-title" style="margin-bottom: 0;">Compiled Details</h3>
+            <div>
+              <button class="btn btn-secondary" id="billing-download-csv-btn"><i data-lucide="download"></i> Download CSV</button>
+              <button class="btn btn-primary" id="billing-download-pdf-btn"><i data-lucide="printer"></i> Download Report</button>
+            </div>
+          </div>
+          <div class="data-table-container" style="margin-top: 20px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Start - End</th>
+                  <th>Hours</th>
+                  <th>DODD Units</th>
+                  <th>Mileage</th>
+                </tr>
+              </thead>
+              <tbody id="compiled-report-table-body">
+                <!-- Calculated rows -->
+              </tbody>
+              <tfoot>
+                <tr style="font-weight: 700; background-color: var(--bg-default);">
+                  <td colspan="3" style="padding: 16px;">TOTALS</td>
+                  <td id="compiled-total-hours" style="padding: 16px;">0.0 hrs</td>
+                  <td id="compiled-total-units" style="padding: 16px;">0 units</td>
+                  <td id="compiled-total-mileage" style="padding: 16px;">0.0 mi</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Generated Reports Logs -->
+        <div class="card">
+          <h3 class="card-title">Generated Reports History</h3>
+          <div class="reports-list" id="generated-reports-history-list">
+            <!-- Simulated list of generated documents -->
+            <div class="report-item">
+              <div class="report-details">
+                <span class="report-name">DODD Upload File - Oct 2023</span>
+                <span class="report-meta">Generated on Oct 25, 2023 • 142 hours total</span>
+              </div>
+              <div class="report-actions">
+                <a class="action-link" href="#"><i data-lucide="download"></i> Download CSV</a>
+                <button class="action-icon-btn"><i data-lucide="eye"></i></button>
+              </div>
+            </div>
+            <div class="report-item">
+              <div class="report-details">
+                <span class="report-name">Hours Worked Summary - Week 42</span>
+                <span class="report-meta">Generated on Oct 22, 2023 • 38.5 hours</span>
+              </div>
+              <div class="report-actions">
+                <a class="action-link" href="#"><i data-lucide="download"></i> Download PDF</a>
+                <button class="action-icon-btn"><i data-lucide="eye"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 5: CONFIGURATION / SETTINGS -->
+    <section class="page" id="page-settings">
+      <div class="page-header">
+        <h2 class="page-title">Configuration Settings</h2>
+      </div>
+
+      <div class="card">
+        <div class="settings-grid">
+          <!-- Gemini AI Section -->
+          <div class="settings-section">
+            <h3 class="card-title" style="margin-bottom: 8px;"><i data-lucide="bot"></i> AI Agent Settings</h3>
+            <div class="settings-row">
+              <div class="settings-label-wrap">
+                <span class="settings-label">Gemini API Key</span>
+                <span class="settings-desc">Provide your Gemini API key to enable natural language commands.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="password" class="form-input" id="setting-gemini-key" placeholder="Enter API Key">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <button class="btn btn-secondary" id="setting-save-gemini-btn">Save API Key</button>
+                  <span class="status-badge disconnected" id="gemini-status-badge">
+                    <i data-lucide="alert-triangle"></i> Not Configured
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 8px 0;">
+
+          <!-- Google Integration Section -->
+          <div class="settings-section">
+            <h3 class="card-title" style="margin-bottom: 8px;"><i data-lucide="cloud"></i> Google Calendar & Tasks</h3>
+            <div class="settings-row">
+              <div class="settings-label-wrap">
+                <span class="settings-label">Google OAuth Client ID</span>
+                <span class="settings-desc">OAuth 2.0 Web Client Credentials ID for fetching live Calendar events and Tasks.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="text" class="form-input" id="setting-google-id" placeholder="Enter OAuth Client ID">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <button class="btn btn-secondary" id="setting-save-google-btn">Save Credentials</button>
+                  <button class="btn btn-primary" id="setting-google-login-btn" style="display: none;">Log In with Google</button>
+                  <button class="btn btn-secondary" id="setting-google-logout-btn" style="display: none;">Log Out</button>
+                  <span class="status-badge disconnected" id="google-status-badge">
+                    <i data-lucide="link-2-off"></i> Mock/Local Mode Active
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 8px 0;">
+
+          <!-- Firebase Cloud Database Section -->
+          <div class="settings-section">
+            <h3 class="card-title" style="margin-bottom: 8px;"><i data-lucide="cloud-lightning"></i> Cloud Database Connection</h3>
+            
+            <div class="settings-row" style="margin-bottom: 16px;">
+              <div class="settings-label-wrap">
+                <span class="settings-label">Database Sync Status</span>
+                <span class="settings-desc">When logged in, your journals, tasks, and expenses sync securely with the cloud. When logged out, the app defaults to Demo Mode using mock data.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                <span class="status-badge disconnected" id="firebase-status-badge">
+                  <i data-lucide="database"></i> localStorage Fallback
+                </span>
+                <span id="firebase-user-status" style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted); text-align: right;">Viewing as Guest</span>
+              </div>
+            </div>
+
+            <div class="settings-row" id="firebase-login-row">
+              <div class="settings-label-wrap">
+                <span class="settings-label">Database Account Login</span>
+                <span class="settings-desc">Sign in with Vanessa's database credentials to sync private records.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px; width: 300px; max-width: 100%;">
+                <input type="email" class="form-input" id="setting-firebase-email" placeholder="Email Address">
+                <input type="password" class="form-input" id="setting-firebase-password" placeholder="Password">
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 4px;">
+                  <button class="btn btn-primary" id="setting-firebase-signin-btn">Sign In</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-row" id="firebase-logout-row" style="display: none;">
+              <div class="settings-label-wrap">
+                <span class="settings-label">Active Connection</span>
+                <span class="settings-desc">Vanessa's database is synced. You can sign out here to return to Guest/Demo mode.</span>
+              </div>
+              <div style="display: flex; justify-content: flex-end; width: 300px; max-width: 100%;">
+                <button class="btn btn-secondary" id="setting-firebase-signout-btn">Sign Out</button>
+              </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 16px 0;">
+
+            <details class="settings-details" style="color: var(--text-muted); font-size: 0.85rem;">
+              <summary style="cursor: pointer; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;"><i data-lucide="settings-2" style="width:14px; height:14px;"></i> Advanced Firebase Configuration</summary>
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px; padding-left: 12px; border-left: 2px solid var(--border-light);">
+                <span class="settings-desc" style="margin-bottom: 4px;">Paste your custom Firebase configuration JSON object here to override the default cloud project:</span>
+                <textarea class="form-input" id="setting-firebase-config" placeholder='{ "apiKey": "...", "authDomain": "...", "projectId": "...", ... }' rows="5" style="font-family: monospace; font-size: 0.8rem; padding: 12px; line-height: 1.4;"></textarea>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                  <button class="btn btn-secondary" id="setting-save-firebase-config-btn" style="padding: 6px 12px; font-size: 0.8rem;">Save Custom Config</button>
+                </div>
+              </div>
+            </details>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOATING AI ASSISTANT CHAT INPUT BAR -->
+    <div class="ai-bar-container">
+      <!-- AI Answer Bubbles Toast -->
+      <div class="ai-bubble-toast" id="ai-response-bubble">
+        <div class="ai-bubble-header">
+          <span>Care Assistant AI</span>
+          <button class="ai-bubble-close" id="ai-response-close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ai-bubble-text" id="ai-response-text">
+          <!-- Reply text -->
+        </div>
+      </div>
+
+      <!-- The Input Row -->
+      <div class="ai-bar">
+        <div class="ai-icon-wrap" id="ai-active-icon">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <input type="text" class="ai-input" id="ai-chat-input" placeholder="How can I assist with care today? Ask about schedules, meal plans, or...">
+        <button class="ai-send-btn" id="ai-chat-send-btn">
+          <i data-lucide="send"></i>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ADD EXPENSE MODAL -->
+  <div class="modal" id="add-expense-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Record New Expense</h4>
+        <button class="modal-close" id="expense-modal-close"><i data-lucide="x"></i></button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label" for="exp-desc">Description</label>
+          <input type="text" class="form-input" id="exp-desc" placeholder="Weekly Home Care Visit, Pharmacy, etc.">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="exp-category">Category</label>
+          <select class="form-input" id="exp-category" style="background-image: none;">
+            <option value="Services">Services</option>
+            <option value="Health">Health</option>
+            <option value="Digital">Digital</option>
+            <option value="Supplies">Supplies</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="exp-amount">Amount</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="form-label" style="font-weight: 700;">$</span>
+            <input type="number" class="form-input" id="exp-amount" step="0.01" placeholder="0.00" style="flex-grow: 1;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="exp-date">Date</label>
+          <input type="date" class="form-input" id="exp-date">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="expense-modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="expense-modal-save">Record Expense</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST ALERTS CONTAINER -->
+  <div class="toast-msg" id="global-toast-msg">Action Saved!</div>
+
+  <!-- Load Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Load Firebase SDK v10 Compat libraries -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <!-- Load Application JavaScripts -->
+  <script src="file-system.js?v=1.8"></script>
+  <script src="google-api.js?v=1.8"></script>
+  <script src="gemini-agent.js?v=1.8"></script>
+  <script src="app.js?v=1.8"></script>
+
+</body>
+</html>

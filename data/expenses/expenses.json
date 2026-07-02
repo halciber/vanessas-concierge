@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1782896584648",
+    "date": "2026-07-01",
+    "description": "Walmart",
+    "category": "Supplies",
+    "amount": 75,
+    "status": "Paid"
+  },
+  {
+    "id": "1",
+    "date": "2026-06-25",
+    "description": "Weekly Home Care Visit",
+    "category": "Services",
+    "amount": 450,
+    "status": "Paid"
+  },
+  {
+    "id": "2",
+    "date": "2026-06-24",
+    "description": "Medical Supplies - Pharmacy",
+    "category": "Health",
+    "amount": 84.2,
+    "status": "Processing"
+  },
+  {
+    "id": "3",
+    "date": "2026-06-22",
+    "description": "Gentle Mobility Session",
+    "category": "Services",
+    "amount": 120,
+    "status": "Paid"
+  },
+  {
+    "id": "4",
+    "date": "2026-06-18",
+    "description": "Subscription - Wellness Hub",
+    "category": "Digital",
+    "amount": 29.99,
+    "status": "Paid"
+  },
+  {
+    "id": "5",
+    "date": "2026-06-15",
+    "description": "Physical Therapy Evaluation",
+    "category": "Health",
+    "amount": 210,
+    "status": "Paid"
+  }
+]
