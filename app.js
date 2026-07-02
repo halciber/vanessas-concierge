@@ -40,9 +40,9 @@ class AppController {
     // 5. Load Settings UI values
     this.loadSettingsUI();
 
-    // 6. Navigate to home (default) and refresh data
+    // 6. Navigate to home (default; switchPage triggers the dashboard load) and pre-load expenses
     this.switchPage('home');
-    await this.refreshAllData();
+    await this.loadExpensesData();
   }
 
   // ----------------------------------------------------

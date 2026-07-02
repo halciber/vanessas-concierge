@@ -359,23 +359,23 @@ class FileSystemManager {
     const start = new Date(startDateStr);
     const end = new Date(endDateStr);
 
-    const files = await this.listFiles(['journal']);
-    for (const file of files) {
-      const dateStr = file.substring(0, 10);
-      const entryDate = new Date(dateStr);
-      if (entryDate >= start && entryDate <= end) {
-        const text = await this.readTextFile(['journal'], file);
-        if (text) {
-          const parsed = this.parseMarkdownWithFrontmatter(text);
-          entries.push({
-            id: file.replace('.md', ''),
-            date: dateStr,
-            ...parsed.metadata,
-            journalContent: parsed.content
-          });
-        }
+    const files = (await this.listFiles(['journal'])).filter(file => {
+      const entryDate = new Date(file.substring(0, 10));
+      return entryDate >= start && entryDate <= end;
+    });
+    const texts = await Promise.all(files.map(file => this.readTextFile(['journal'], file)));
+    files.forEach((file, i) => {
+      const text = texts[i];
+      if (text) {
+        const parsed = this.parseMarkdownWithFrontmatter(text);
+        entries.push({
+          id: file.replace('.md', ''),
+          date: file.substring(0, 10),
+          ...parsed.metadata,
+          journalContent: parsed.content
+        });
       }
-    }
+    });
     return entries.sort((a, b) => a.date.localeCompare(b.date));
   }
 
@@ -499,8 +499,9 @@ class FileSystemManager {
 
     const tasks = [];
     const files = await this.listFiles(['tasks']);
-    for (const file of files) {
-      const text = await this.readTextFile(['tasks'], file);
+    const texts = await Promise.all(files.map(file => this.readTextFile(['tasks'], file)));
+    files.forEach((file, i) => {
+      const text = texts[i];
       if (text) {
         const parsed = this.parseMarkdownWithFrontmatter(text);
         tasks.push({
@@ -509,7 +510,7 @@ class FileSystemManager {
           description: parsed.content
         });
       }
-    }
+    });
     
     if (tasks.length === 0) {
       const defaultTasks = [
@@ -609,8 +610,9 @@ class FileSystemManager {
 
     const events = [];
     const files = await this.listFiles(['calendar']);
-    for (const file of files) {
-      const text = await this.readTextFile(['calendar'], file);
+    const texts = await Promise.all(files.map(file => this.readTextFile(['calendar'], file)));
+    files.forEach((file, i) => {
+      const text = texts[i];
       if (text) {
         const parsed = this.parseMarkdownWithFrontmatter(text);
         // Body is stored as "# Event: <title>" followed by details; only the details are the description
@@ -621,7 +623,7 @@ class FileSystemManager {
           description: description
         });
       }
-    }
+    });
     
     if (events.length === 0) {
       const today = new Date().toISOString().split('T')[0];
@@ -718,8 +720,9 @@ class FileSystemManager {
 
     const reminders = [];
     const files = await this.listFiles(['reminders']);
-    for (const file of files) {
-      const text = await this.readTextFile(['reminders'], file);
+    const texts = await Promise.all(files.map(file => this.readTextFile(['reminders'], file)));
+    files.forEach((file, i) => {
+      const text = texts[i];
       if (text) {
         const parsed = this.parseMarkdownWithFrontmatter(text);
         reminders.push({
@@ -728,7 +731,7 @@ class FileSystemManager {
           text: parsed.content
         });
       }
-    }
+    });
     
     if (reminders.length === 0) {
       const defaultReminders = [
