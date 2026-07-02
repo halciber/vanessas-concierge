@@ -331,11 +331,6 @@ class AppController {
     remindersContainer.innerHTML = '';
 
     const displayReminders = [...localReminders];
-    if (displayReminders.length === 0) {
-      // Add defaults if none exist
-      displayReminders.push({ id: 'rem-def-1', title: 'Critical Update', text: 'Call pharmacy for renewal.', type: 'critical' });
-      displayReminders.push({ id: 'rem-def-2', title: 'Note', text: 'Mild knee pain reported by John.', type: 'note' });
-    }
 
     displayReminders.forEach(rem => {
       const remHtml = `

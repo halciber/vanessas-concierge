@@ -481,11 +481,7 @@ class FileSystemManager {
 
         // Initialize defaults if empty in cloud
         if (tasks.length === 0) {
-          const defaultTasks = [
-            { id: 'task-def-1', title: 'Submit weekly meal plan', status: 'needsAction', created_at: new Date().toISOString().split('T')[0] },
-            { id: 'task-def-2', title: 'Update hydration tracker', status: 'needsAction', created_at: new Date().toISOString().split('T')[0] },
-            { id: 'task-def-3', title: 'Coordinate family visit', status: 'needsAction', created_at: new Date().toISOString().split('T')[0] }
-          ];
+          const defaultTasks = this.getDefaultTasks();
           for (const t of defaultTasks) {
             await this.saveTask(t);
             tasks.push({ ...t, description: `# Task: ${t.title}` });
@@ -513,11 +509,7 @@ class FileSystemManager {
     });
     
     if (tasks.length === 0) {
-      const defaultTasks = [
-        { id: 'task-def-1', title: 'Submit weekly meal plan', status: 'needsAction' },
-        { id: 'task-def-2', title: 'Update hydration tracker', status: 'needsAction' },
-        { id: 'task-def-3', title: 'Coordinate family visit', status: 'needsAction' }
-      ];
+      const defaultTasks = this.getDefaultTasks();
       for (const t of defaultTasks) {
         await this.saveTask(t);
         tasks.push({ ...t, description: `# Task: ${t.title}` });
@@ -584,20 +576,7 @@ class FileSystemManager {
 
         // Initialize defaults if empty in cloud
         if (events.length === 0) {
-          const today = new Date().toISOString().split('T')[0];
-          const getRelativeDate = (offsetDays) => {
-            const d = new Date();
-            d.setDate(d.getDate() + offsetDays);
-            return d.toISOString().split('T')[0];
-          };
-          const defaultEvents = [
-            { id: 'event-def-1', summary: 'Morning Vital Checks', startDateTime: `${today}T09:00:00`, endDateTime: `${today}T10:00:00`, completed: true, description: 'Blood pressure & sugar checks for John.' },
-            { id: 'event-def-2', summary: 'Physical Therapy', startDateTime: `${today}T11:30:00`, endDateTime: `${today}T12:30:00`, completed: false, description: 'Dr. Marcus home visit for stretches.' },
-            { id: 'event-def-3', summary: 'Optometrist Appointment', startDateTime: `${getRelativeDate(1)}T10:00:00`, endDateTime: `${getRelativeDate(1)}T11:00:00`, completed: false, description: '10:00 AM • Main St Vision Center' },
-            { id: 'event-def-4', summary: 'Grocery Restock', startDateTime: `${getRelativeDate(2)}T14:00:00`, endDateTime: `${getRelativeDate(2)}T15:00:00`, completed: false, description: 'Focused on fresh organic greens.' },
-            { id: 'event-def-5', summary: 'Social Tea Hour', startDateTime: `${getRelativeDate(4)}T15:30:00`, endDateTime: `${getRelativeDate(4)}T17:00:00`, completed: false, description: 'Community Center Hall B' }
-          ];
-          for (const e of defaultEvents) {
+          for (const e of this.getDefaultEvents()) {
             await this.saveEvent(e);
             events.push(e);
           }
@@ -626,20 +605,7 @@ class FileSystemManager {
     });
     
     if (events.length === 0) {
-      const today = new Date().toISOString().split('T')[0];
-      const getRelativeDate = (offsetDays) => {
-        const d = new Date();
-        d.setDate(d.getDate() + offsetDays);
-        return d.toISOString().split('T')[0];
-      };
-      const defaultEvents = [
-        { id: 'event-def-1', summary: 'Morning Vital Checks', startDateTime: `${today}T09:00:00`, endDateTime: `${today}T10:00:00`, completed: true, description: 'Blood pressure & sugar checks for John.' },
-        { id: 'event-def-2', summary: 'Physical Therapy', startDateTime: `${today}T11:30:00`, endDateTime: `${today}T12:30:00`, completed: false, description: 'Dr. Marcus home visit for stretches.' },
-        { id: 'event-def-3', summary: 'Optometrist Appointment', startDateTime: `${getRelativeDate(1)}T10:00:00`, endDateTime: `${getRelativeDate(1)}T11:00:00`, completed: false, description: '10:00 AM • Main St Vision Center' },
-        { id: 'event-def-4', summary: 'Grocery Restock', startDateTime: `${getRelativeDate(2)}T14:00:00`, endDateTime: `${getRelativeDate(2)}T15:00:00`, completed: false, description: 'Focused on fresh organic greens.' },
-        { id: 'event-def-5', summary: 'Social Tea Hour', startDateTime: `${getRelativeDate(4)}T15:30:00`, endDateTime: `${getRelativeDate(4)}T17:00:00`, completed: false, description: 'Community Center Hall B' }
-      ];
-      for (const e of defaultEvents) {
+      for (const e of this.getDefaultEvents()) {
         await this.saveEvent(e);
         events.push(e);
       }
@@ -703,10 +669,7 @@ class FileSystemManager {
 
         // Initialize defaults if empty in cloud
         if (reminders.length === 0) {
-          const defaultReminders = [
-            { id: 'rem-def-1', title: 'Critical Update', text: 'Call pharmacy for renewal.', type: 'critical', date: new Date().toISOString().split('T')[0] },
-            { id: 'rem-def-2', title: 'Note', text: 'Mild knee pain reported by John.', type: 'note', date: new Date().toISOString().split('T')[0] }
-          ];
+          const defaultReminders = this.getDefaultReminders();
           for (const r of defaultReminders) {
             await this.saveReminder(r);
             reminders.push(r);
@@ -734,10 +697,7 @@ class FileSystemManager {
     });
     
     if (reminders.length === 0) {
-      const defaultReminders = [
-        { id: 'rem-def-1', title: 'Critical Update', text: 'Call pharmacy for renewal.', type: 'critical' },
-        { id: 'rem-def-2', title: 'Note', text: 'Mild knee pain reported by John.', type: 'note' }
-      ];
+      const defaultReminders = this.getDefaultReminders();
       for (const r of defaultReminders) {
         await this.saveReminder(r);
         reminders.push(r);
@@ -853,22 +813,67 @@ class FileSystemManager {
     await this.writeTextFile(['routine'], filename, fileContent);
   }
 
+  // Mirrors data/routine/*.md so hosted guest mode matches local development
   getDefaultRoutineForDay(dayOfWeek) {
+    const dailyItems = [
+      'Client hygiene & personal care',
+      'Morning medication check',
+      'Pet care (feed & walk)'
+    ];
+    const extrasByDay = {
+      monday: ['Apartment cleaning'],
+      tuesday: ['Laundry (wash & fold)', 'Check mail'],
+      wednesday: ['Apartment cleaning', 'Water plants'],
+      thursday: ['Grocery & pantry check'],
+      friday: ['Apartment cleaning', 'Submit timesheet logs'],
+      saturday: ['Laundry (wash & fold)', 'Change bed linens'],
+      sunday: ['Refill weekly medication organizer', 'Plan meals & appointments for the week']
+    };
     const day = dayOfWeek.toLowerCase();
-    const defaults = [];
-    if (day === 'monday') {
-      defaults.push({ activity: 'Client hygiene', completed: false });
-      defaults.push({ activity: 'Clean litter box', completed: true });
-    } else if (day === 'wednesday') {
-      defaults.push({ activity: 'Refill medicine containers', completed: false });
-    } else if (day === 'friday') {
-      defaults.push({ activity: 'Submit timesheet logs', completed: false });
-      defaults.push({ activity: 'Client hygiene', completed: false });
-    } else {
-      defaults.push({ activity: 'Client hygiene', completed: false });
-      defaults.push({ activity: 'Pet Care (Fed & Walked)', completed: true });
-    }
-    return defaults;
+    const activities = dailyItems.concat(extrasByDay[day] || [], ['Prepare lunch & dinner']);
+    return activities.map(activity => ({ activity: activity, completed: false }));
+  }
+
+  // Mirrors data/calendar/*.md, but with dates relative to today so the demo
+  // schedule stays populated no matter when the app is first opened
+  getDefaultEvents() {
+    const rel = (offsetDays, time) => {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return `${dateStr}T${time}`;
+    };
+    return [
+      { id: 'event-def-1', summary: 'Morning Vital Checks - John', startDateTime: rel(0, '09:00:00'), endDateTime: rel(0, '10:00:00'), completed: true, description: 'Blood pressure & sugar checks for John.' },
+      { id: 'event-def-2', summary: 'Physical Therapy - John', startDateTime: rel(0, '11:30:00'), endDateTime: rel(0, '12:30:00'), completed: false, description: 'Weekly mobility session at Riverside Rehab, Suite 204. Bring updated exercise log.' },
+      { id: 'event-def-3', summary: 'Social Tea Hour - All Clients', startDateTime: rel(0, '15:30:00'), endDateTime: rel(0, '17:00:00'), completed: false, description: 'Community Center Hall B. Board games and snacks.' },
+      { id: 'event-def-4', summary: 'Dental Cleaning - Marcus', startDateTime: rel(1, '09:30:00'), endDateTime: rel(1, '10:30:00'), completed: false, description: 'Smile Bright Dental on Oak St. Arrive 15 min early for paperwork.' },
+      { id: 'event-def-5', summary: 'Haircut & Beauty Appointment - Diana', startDateTime: rel(2, '13:00:00'), endDateTime: rel(2, '14:30:00'), completed: false, description: 'Monthly salon visit at Gentle Touch Salon. Diana likes to chat with stylist Rosa.' },
+      { id: 'event-def-6', summary: 'Quarterly Care Plan Review - John', startDateTime: rel(3, '11:00:00'), endDateTime: rel(3, '12:00:00'), completed: false, description: "Meeting with case manager and John's guardian at the county SSA office. Bring journal summaries and unit totals." },
+      { id: 'event-def-7', summary: 'Grocery Run & Meal Prep - Marcus', startDateTime: rel(5, '14:00:00'), endDateTime: rel(5, '16:00:00'), completed: false, description: 'Weekly shopping trip, then prep meals for the weekend.' },
+      { id: 'event-def-8', summary: 'Eye Doctor - Diana', startDateTime: rel(8, '09:00:00'), endDateTime: rel(8, '10:00:00'), completed: false, description: 'Annual vision exam at ClearView Optometry. Confirm insurance coverage for new glasses.' },
+      { id: 'event-def-9', summary: 'Pharmacy Pickup & Med Review - John', startDateTime: rel(11, '10:30:00'), endDateTime: rel(11, '11:15:00'), completed: false, description: 'Monthly refill pickup at Main St Pharmacy, then medication organizer refill at home.' }
+    ];
+  }
+
+  getDefaultTasks() {
+    const today = new Date().toISOString().split('T')[0];
+    return [
+      { id: 'task-def-1', title: "Pick up John's prescription refill", status: 'needsAction', created_at: today },
+      { id: 'task-def-2', title: 'Submit weekly meal plan to guardian', status: 'needsAction', created_at: today },
+      { id: 'task-def-3', title: "Schedule Diana's ride to the salon", status: 'needsAction', created_at: today },
+      { id: 'task-def-4', title: 'Update mileage log for the week', status: 'needsAction', created_at: today },
+      { id: 'task-def-5', title: 'Coordinate family visit for Marcus', status: 'needsAction', created_at: today }
+    ];
+  }
+
+  getDefaultReminders() {
+    const today = new Date().toISOString().split('T')[0];
+    return [
+      { id: 'rem-def-1', title: 'Critical Update', text: "Call pharmacy for John's prescription renewal.", type: 'critical', date: today },
+      { id: 'rem-def-2', title: 'Note', text: 'Mild knee pain reported by John after therapy.', type: 'note', date: today },
+      { id: 'rem-def-3', title: 'Call Request', text: "Diana's guardian asked for a call about the weekend schedule.", type: 'note', date: today }
+    ];
   }
 }
 
