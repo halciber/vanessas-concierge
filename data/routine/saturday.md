@@ -1,11 +1,11 @@
 ---
-day: "Tuesday"
+day: "Saturday"
 ---
-# Routine for Tuesday
+# Routine for Saturday
 
 - [ ] Client hygiene & personal care
 - [ ] Morning medication check
 - [ ] Pet care (feed & walk)
 - [ ] Laundry (wash & fold)
-- [ ] Check mail
+- [ ] Change bed linens
 - [ ] Prepare lunch & dinner

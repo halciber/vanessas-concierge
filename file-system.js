@@ -613,10 +613,12 @@ class FileSystemManager {
       const text = await this.readTextFile(['calendar'], file);
       if (text) {
         const parsed = this.parseMarkdownWithFrontmatter(text);
+        // Body is stored as "# Event: <title>" followed by details; only the details are the description
+        const description = (parsed.content || '').trim().replace(/^#.*(\r?\n)*/, '').trim();
         events.push({
           id: file.replace('.md', ''),
           ...parsed.metadata,
-          description: parsed.content
+          description: description
         });
       }
     }

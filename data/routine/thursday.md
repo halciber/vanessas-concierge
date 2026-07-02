@@ -1,11 +1,10 @@
 ---
-day: "Tuesday"
+day: "Thursday"
 ---
-# Routine for Tuesday
+# Routine for Thursday
 
 - [ ] Client hygiene & personal care
 - [ ] Morning medication check
 - [ ] Pet care (feed & walk)
-- [ ] Laundry (wash & fold)
-- [ ] Check mail
+- [ ] Grocery & pantry check
 - [ ] Prepare lunch & dinner

@@ -1,6 +1,11 @@
 ---
-day: "wednesday"
+day: "Wednesday"
 ---
-# Routine for wednesday
+# Routine for Wednesday
 
-- [ ] Clean kitchen
+- [ ] Client hygiene & personal care
+- [ ] Morning medication check
+- [ ] Pet care (feed & walk)
+- [ ] Apartment cleaning
+- [ ] Water plants
+- [ ] Prepare lunch & dinner

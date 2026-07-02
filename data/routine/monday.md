@@ -1,6 +1,10 @@
 ---
-day: "monday"
+day: "Monday"
 ---
-# Routine for monday
+# Routine for Monday
 
-- [ ] To Monday Check vitals
+- [ ] Client hygiene & personal care
+- [ ] Morning medication check
+- [ ] Pet care (feed & walk)
+- [ ] Apartment cleaning
+- [ ] Prepare lunch & dinner
