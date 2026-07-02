@@ -1214,13 +1214,7 @@ class AppController {
       });
     });
 
-    // 2. Quick task additions on Home page
-    document.getElementById('quick-task-add-btn').addEventListener('click', () => this.addQuickTask());
-    document.getElementById('quick-task-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') this.addQuickTask();
-    });
-
-    // 3. Daily Journal event updates
+    // 2. Daily Journal event updates
     document.getElementById('work-start-time').addEventListener('change', () => this.recalculateJournalUnits());
     document.getElementById('work-end-time').addEventListener('change', () => this.recalculateJournalUnits());
     document.getElementById('journal-save-btn').addEventListener('click', () => this.saveJournalToday());
@@ -1229,7 +1223,7 @@ class AppController {
 
 
 
-    // 4. Expenses filtering and modals
+    // 3. Expenses filtering and modals
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -1252,7 +1246,7 @@ class AppController {
     });
     document.getElementById('expense-modal-save').addEventListener('click', () => this.recordNewExpense());
 
-    // 5. Billing Generator range clicks and compiling
+    // 4. Billing Generator range clicks and compiling
     document.getElementById('billing-cal-prev').addEventListener('click', () => {
       this.billingCalMonth1.setMonth(this.billingCalMonth1.getMonth() - 1);
       this.billingCalMonth2.setMonth(this.billingCalMonth2.getMonth() - 1);
@@ -1276,7 +1270,7 @@ class AppController {
     document.getElementById('billing-download-csv-btn').addEventListener('click', () => this.downloadCSVReport());
     document.getElementById('billing-download-pdf-btn').addEventListener('click', () => this.printPDFReport());
 
-    // 6. Settings Actions
+    // 5. Settings Actions
     document.getElementById('setting-save-gemini-btn').addEventListener('click', () => {
       const val = document.getElementById('setting-gemini-key').value.trim();
       geminiAgent.setApiKey(val);
@@ -1313,7 +1307,7 @@ class AppController {
 
 
 
-    // 7. Floating AI Input actions
+    // 6. Floating AI Input actions
     document.getElementById('ai-chat-send-btn').addEventListener('click', () => this.submitAIChat());
     document.getElementById('ai-chat-input').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.submitAIChat();
@@ -1322,7 +1316,7 @@ class AppController {
       document.getElementById('ai-response-bubble').classList.remove('active');
     });
 
-    // 8. Firebase Actions & Auth Events
+    // 7. Firebase Actions & Auth Events
     window.addEventListener('firebase-auth-change', () => {
       this.updateFirebaseUI();
       this.refreshAllData();
@@ -1406,35 +1400,6 @@ class AppController {
       }
     }
     setTimeout(() => location.reload(), 1500);
-  }
-
-  async addQuickTask() {
-    const input = document.getElementById('quick-task-input');
-    const title = input.value.trim();
-    if (!title) return;
-    
-    // 1. Save locally in tasks folder
-    const taskId = 'task-' + Date.now();
-    const localTask = {
-      id: taskId,
-      title: title,
-      status: 'needsAction',
-      created_at: new Date().toISOString().split('T')[0]
-    };
-    await fileSystem.saveTask(localTask);
-
-    // 2. Sync with Google Tasks if authorized
-    if (googleAPI.isAuthorized()) {
-      try {
-        await googleAPI.createTask(title);
-      } catch (e) {
-        console.warn("Failed to create task in Google, kept local copy.", e);
-      }
-    }
-
-    input.value = '';
-    this.showToast("Task added!");
-    await this.loadDashboardData();
   }
 
   // ----------------------------------------------------
