@@ -108,5 +108,7 @@ class ConciergeRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     print(f"Starting Concierge Local Server on http://localhost:{PORT}...")
-    server = http.server.HTTPServer(('localhost', PORT), ConciergeRequestHandler)
+    # ThreadingHTTPServer: browsers hold idle keep-alive/preconnect sockets open,
+    # which deadlocks the single-threaded HTTPServer (all requests queue behind them).
+    server = http.server.ThreadingHTTPServer(('localhost', PORT), ConciergeRequestHandler)
     server.serve_forever()
