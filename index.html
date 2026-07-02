@@ -112,25 +112,19 @@
           </div>
         </div>
         
-        <!-- Tasks Column -->
+        <!-- Combined To-Do & Reminders Column -->
         <div class="card">
           <h3 class="card-title">
             <i data-lucide="check-square"></i>
-            To-Do Items
+            To-Do & Reminders
           </h3>
-          <div class="task-list" id="dashboard-tasks">
-            <!-- Dynamic tasks list -->
-          </div>
-        </div>
-
-        <!-- Reminders Column -->
-        <div class="card">
-          <h3 class="card-title" style="margin-bottom: 16px;">
-            <i data-lucide="alert-circle" style="color: var(--error);"></i>
-            Reminders
-          </h3>
-          <div class="reminders-list" id="dashboard-reminders">
-            <!-- Dynamic reminders -->
+          <div class="combined-list">
+            <div class="reminders-list" id="dashboard-reminders">
+              <!-- Pinned reminders (top of mind) -->
+            </div>
+            <div class="task-list" id="dashboard-tasks">
+              <!-- Dynamic tasks list -->
+            </div>
           </div>
         </div>
       </div>

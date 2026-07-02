@@ -241,7 +241,7 @@ body {
    ---------------------------------------------------- */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1.1fr;
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -258,8 +258,7 @@ body {
 
 .dashboard-grid .schedule-list,
 .dashboard-grid .routine-grid,
-.dashboard-grid .task-list,
-.dashboard-grid .reminders-list {
+.dashboard-grid .combined-list {
   flex-grow: 1;
   overflow-y: auto;
   min-height: 0;
@@ -269,34 +268,40 @@ body {
   scrollbar-color: rgba(102, 92, 94, 0.4) transparent;
 }
 
+/* Inside the combined card, pinned reminders sit above the task list */
+.dashboard-grid .combined-list .reminders-list {
+  margin-bottom: 16px;
+}
+
+.dashboard-grid .combined-list .reminders-list:empty {
+  display: none;
+  margin-bottom: 0;
+}
+
 
 /* Custom Scrollbar for dashboard card lists */
 .dashboard-grid .schedule-list::-webkit-scrollbar,
 .dashboard-grid .routine-grid::-webkit-scrollbar,
-.dashboard-grid .task-list::-webkit-scrollbar,
-.dashboard-grid .reminders-list::-webkit-scrollbar {
+.dashboard-grid .combined-list::-webkit-scrollbar {
   width: 6px;
 }
 
 .dashboard-grid .schedule-list::-webkit-scrollbar-track,
 .dashboard-grid .routine-grid::-webkit-scrollbar-track,
-.dashboard-grid .task-list::-webkit-scrollbar-track,
-.dashboard-grid .reminders-list::-webkit-scrollbar-track {
+.dashboard-grid .combined-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .dashboard-grid .schedule-list::-webkit-scrollbar-thumb,
 .dashboard-grid .routine-grid::-webkit-scrollbar-thumb,
-.dashboard-grid .task-list::-webkit-scrollbar-thumb,
-.dashboard-grid .reminders-list::-webkit-scrollbar-thumb {
+.dashboard-grid .combined-list::-webkit-scrollbar-thumb {
   background: rgba(102, 92, 94, 0.45);
   border-radius: var(--rounded-pill);
 }
 
 .dashboard-grid .schedule-list::-webkit-scrollbar-thumb:hover,
 .dashboard-grid .routine-grid::-webkit-scrollbar-thumb:hover,
-.dashboard-grid .task-list::-webkit-scrollbar-thumb:hover,
-.dashboard-grid .reminders-list::-webkit-scrollbar-thumb:hover {
+.dashboard-grid .combined-list::-webkit-scrollbar-thumb:hover {
   background: rgba(102, 92, 94, 0.7);
 }
 
@@ -1491,16 +1496,25 @@ body {
   }
 }
 
-/* Responsive adjustments for 4-column Dashboard Layout */
-@media (max-width: 1400px) {
+/* Responsive adjustments for 3-column Dashboard Layout */
+@media (max-width: 1250px) {
   .dashboard-grid {
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+  /* Schedule card spans the full first row */
+  .dashboard-grid .card:first-child {
+    grid-column: span 2;
+    height: auto;
+    max-height: 380px;
   }
 }
 
 @media (max-width: 992px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+  .dashboard-grid .card:first-child {
+    grid-column: auto;
   }
   .journal-layout {
     grid-template-columns: 1fr;

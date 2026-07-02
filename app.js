@@ -246,12 +246,15 @@ class AppController {
       }
     }
 
-    const normalizedGoogleTasks = googleTasks.map(t => ({
-      id: t.id,
-      title: t.title || 'Untitled Task',
-      status: t.status,
-      source: 'google'
-    }));
+    const normalizedGoogleTasks = googleTasks
+      // Reminders synced to Google Tasks already show as pinned reminder cards; don't list them twice
+      .filter(t => !(t.title || '').startsWith('Reminder:'))
+      .map(t => ({
+        id: t.id,
+        title: t.title || 'Untitled Task',
+        status: t.status,
+        source: 'google'
+      }));
 
     const normalizedLocalTasks = localTasks.map(t => ({
       ...t,
@@ -1649,8 +1652,20 @@ class AppController {
           date: new Date().toISOString().split('T')[0]
         };
         await fileSystem.saveReminder(localReminder);
+
+        // Also push to Google Tasks so the reminder reaches Vanessa's phone during the day
+        let syncedToGoogle = false;
+        if (googleAPI.isAuthorized()) {
+          try {
+            await googleAPI.createTask(`Reminder: ${localReminder.title} - ${localReminder.text}`);
+            syncedToGoogle = true;
+          } catch (e) {
+            console.warn("Failed to sync reminder to Google Tasks, kept local copy.", e);
+          }
+        }
+
         await this.loadDashboardData();
-        return { reminder_id: reminderId, status: "created", title: localReminder.title, text: localReminder.text };
+        return { reminder_id: reminderId, status: "created", title: localReminder.title, text: localReminder.text, synced_to_google_tasks: syncedToGoogle };
       },
 
       // 9. Tool to list reminders/alerts
