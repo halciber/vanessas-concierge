@@ -4,6 +4,40 @@
  * Manages SPA navigation, binds events, updates components, and coordinates between JS modules.
  */
 
+// Standardized expense descriptions (the "category" field), agreed with the
+// client's guardian for the monthly expense report
+const EXPENSE_CATEGORIES = [
+  'Groceries',
+  'Groceries and misc. house goods',
+  'Food/Meal',
+  'Cash for activities',
+  'Misc. household goods',
+  'Hair/Beauty supplies',
+  'Crafts/Supplies',
+  'Misc./Pharmacy',
+  'Used clothing',
+  'Taxable misc.',
+  'Haircare'
+];
+
+// Known vendors and their standardized descriptions
+const VENDOR_CATEGORIES = {
+  'ALDI': 'Groceries',
+  'Walmart': 'Groceries and misc. house goods',
+  "McDonald's": 'Food/Meal',
+  'WellAbility': 'Cash for activities',
+  'Fiesta Acapulco': 'Food/Meal',
+  'Giant Eagle': 'Groceries',
+  'Chipotle': 'Food/Meal',
+  'Dollar Tree': 'Misc. household goods',
+  'Sally Beauty': 'Hair/Beauty supplies',
+  'Michaels': 'Crafts/Supplies',
+  'CVS': 'Misc./Pharmacy',
+  'Deja Vu': 'Used clothing',
+  'Five Below': 'Taxable misc.',
+  'Ulta Beauty Salon': 'Haircare'
+};
+
 class AppController {
   constructor() {
     this.activePage = 'home';
@@ -772,7 +806,7 @@ class AppController {
       tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); font-style: italic;">No expenses found matching the filter.</td></tr>';
     } else {
       filteredExpenses.forEach(exp => {
-        const catClass = `tag-${exp.category.toLowerCase()}`;
+        const catClass = `tag-${exp.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
         const statusClass = `status-${exp.status.toLowerCase().replace(/\s+/g, '-')}`;
 
         const row = `
@@ -842,7 +876,7 @@ class AppController {
   openExpenseModal(expense = null) {
     this.editingExpenseId = expense ? expense.id : null;
     document.getElementById('exp-desc').value = expense ? expense.description : '';
-    document.getElementById('exp-category').value = expense ? expense.category : 'Services';
+    document.getElementById('exp-category').value = (expense && EXPENSE_CATEGORIES.includes(expense.category)) ? expense.category : 'Groceries';
     document.getElementById('exp-amount').value = expense ? expense.amount : '';
     document.getElementById('exp-date').value = expense ? expense.date : toLocalDateString();
     const paymentMethods = ['Debit', 'Client Cash', 'Provider Cash', 'SNAP'];
@@ -1442,6 +1476,18 @@ class AppController {
   // ----------------------------------------------------
   // Client-Side AI Tool Executors Callback Hooks
   // ----------------------------------------------------
+  // Returns the standardized description for a known vendor, or null.
+  // Matching ignores case and punctuation so "mcdonalds" still hits "McDonald's".
+  categorizeVendor(storeName) {
+    const normalize = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const needle = normalize(storeName);
+    if (!needle) return null;
+    for (const [vendor, category] of Object.entries(VENDOR_CATEGORIES)) {
+      if (needle.includes(normalize(vendor))) return category;
+    }
+    return null;
+  }
+
   // Resolves the expense an AI tool call refers to, by id or description match
   async findExpenseForAgent(args) {
     const expenses = await fileSystem.getExpenses();
@@ -1605,9 +1651,12 @@ class AppController {
 
       // 5. Tool to record expense reports
       logExpense: async (args) => {
-        const category = args.category || "Supplies";
         const amt = Number(args.amount) || 0.0;
-        const desc = args.description || "Misc Supplies";
+        const desc = args.description || "Misc.";
+        // Known vendors always get their standardized description for guardian-report consistency
+        const category = this.categorizeVendor(desc)
+          || (EXPENSE_CATEGORIES.includes(args.category) ? args.category : null)
+          || 'Misc. household goods';
         const paymentMethod = args.payment_method || 'Debit';
 
         const todayStr = toLocalDateString();

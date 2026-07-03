@@ -14,6 +14,7 @@ Vanessa takes care of special needs adults and needs a clean, low-stress, organi
 Your goal is to help her manage her day, schedule events, complete tasks (checklist items), manage reminders (brief notes, alerts, or warnings), manage daily routines (checklist items for specific days of the week), log journal entries (including work start/end times and mileage), and track expenses. 
 Use the 'addTodoItem' tool for actionable tasks on her To-Do list, 'addReminder' for notifications, quick alerts, or warnings (like calling someone or renewals), and 'addDailyRoutineItem' / 'removeDailyRoutineItem' / 'listDailyRoutine' to manage daily routine items (like Client hygiene or Pet care) for specific days of the week.
 For expenses, use 'logExpense' to record new ones, and 'updateExpense' / 'deleteExpense' to correct or remove existing ones. When updating or deleting, call 'listExpenses' first if you are unsure which expense matches, and ask Vanessa to clarify if several could match.
+Expense records go into a monthly report for the client's guardian, so they follow a standard: the expense description is the STORE/VENDOR name, and the category is the standardized purchase description. Known vendors and their standard descriptions: ALDI = Groceries; Walmart = Groceries and misc. house goods; McDonald's = Food/Meal; WellAbility = Cash for activities; Fiesta Acapulco = Food/Meal; Giant Eagle = Groceries; Chipotle = Food/Meal; Dollar Tree = Misc. household goods; Sally Beauty = Hair/Beauty supplies; Michaels = Crafts/Supplies; CVS = Misc./Pharmacy; Deja Vu = Used clothing; Five Below = Taxable misc.; Ulta Beauty Salon = Haircare.
 
 You can perform actions on her behalf using the tools provided. When an action is completed, explain what you did in a warm, friendly, and reassuring tone. 
 Avoid jargon. Keep responses concise and supportive. Always assume the current year is 2026.`;
@@ -79,12 +80,12 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
             parameters: {
               type: "OBJECT",
               properties: {
-                description: { type: "STRING", description: "What was purchased, e.g., 'Medical Supplies - Pharmacy'." },
-                category: { type: "STRING", description: "Expense category: 'Services', 'Health', 'Digital', or 'Supplies'." },
+                description: { type: "STRING", description: "The store or vendor name where the purchase was made, e.g., 'Walmart', 'ALDI', 'CVS'." },
+                category: { type: "STRING", description: "The standardized purchase description for the guardian report. Known vendors are auto-categorized; only needed for unknown vendors.", enum: ["Groceries", "Groceries and misc. house goods", "Food/Meal", "Cash for activities", "Misc. household goods", "Hair/Beauty supplies", "Crafts/Supplies", "Misc./Pharmacy", "Used clothing", "Taxable misc.", "Haircare"] },
                 amount: { type: "NUMBER", description: "Cost of the item in USD, e.g., 84.20." },
                 payment_method: { type: "STRING", description: "How it was paid: 'Debit', 'Client Cash', 'Provider Cash', or 'SNAP'. Defaults to 'Debit'.", enum: ["Debit", "Client Cash", "Provider Cash", "SNAP"] }
               },
-              required: ["description", "category", "amount"]
+              required: ["description", "amount"]
             }
           },
           {
@@ -104,9 +105,9 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
               properties: {
                 expense_id: { type: "STRING", description: "The id of the expense to update, from listExpenses." },
                 description: { type: "STRING", description: "Text to match against the expense description if no expense_id is given, e.g. 'Walmart'." },
-                new_description: { type: "STRING", description: "New description text, if it should change." },
+                new_description: { type: "STRING", description: "New store/vendor name, if it should change." },
                 new_amount: { type: "NUMBER", description: "New amount in USD, if it should change." },
-                new_category: { type: "STRING", description: "New category: 'Services', 'Health', 'Digital', or 'Supplies'." },
+                new_category: { type: "STRING", description: "New standardized purchase description.", enum: ["Groceries", "Groceries and misc. house goods", "Food/Meal", "Cash for activities", "Misc. household goods", "Hair/Beauty supplies", "Crafts/Supplies", "Misc./Pharmacy", "Used clothing", "Taxable misc.", "Haircare"] },
                 new_date: { type: "STRING", description: "New date in YYYY-MM-DD format, if it should change." },
                 new_status: { type: "STRING", description: "New payment method: 'Debit', 'Client Cash', 'Provider Cash', or 'SNAP'.", enum: ["Debit", "Client Cash", "Provider Cash", "SNAP"] }
               },
@@ -569,7 +570,7 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
       }
 
       if (this.callbacks.logExpense) {
-        const args = { description, category: "Supplies", amount };
+        const args = { description, amount };
         await this.callbacks.logExpense(args);
         actions.push({ type: 'logExpense', args });
         text = `✨ **(Offline Demo Mode)** I've recorded a **$${amount.toFixed(2)}** expense for **"${description}"**.`;

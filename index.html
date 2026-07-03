@@ -255,8 +255,8 @@
             <thead>
               <tr>
                 <th>Date</th>
+                <th>Store</th>
                 <th>Description</th>
-                <th>Category</th>
                 <th>Amount</th>
                 <th>Payment</th>
                 <th style="text-align: right;">Actions</th>
@@ -543,16 +543,23 @@
       </div>
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <div class="form-group">
-          <label class="form-label" for="exp-desc">Description</label>
-          <input type="text" class="form-input" id="exp-desc" placeholder="Weekly Home Care Visit, Pharmacy, etc.">
+          <label class="form-label" for="exp-desc">Store / Vendor</label>
+          <input type="text" class="form-input" id="exp-desc" placeholder="Walmart, ALDI, McDonald's, etc.">
         </div>
         <div class="form-group">
-          <label class="form-label" for="exp-category">Category</label>
+          <label class="form-label" for="exp-category">Description</label>
           <select class="form-input" id="exp-category" style="background-image: none;">
-            <option value="Services">Services</option>
-            <option value="Health">Health</option>
-            <option value="Digital">Digital</option>
-            <option value="Supplies">Supplies</option>
+            <option value="Groceries">Groceries</option>
+            <option value="Groceries and misc. house goods">Groceries and misc. house goods</option>
+            <option value="Food/Meal">Food/Meal</option>
+            <option value="Cash for activities">Cash for activities</option>
+            <option value="Misc. household goods">Misc. household goods</option>
+            <option value="Hair/Beauty supplies">Hair/Beauty supplies</option>
+            <option value="Crafts/Supplies">Crafts/Supplies</option>
+            <option value="Misc./Pharmacy">Misc./Pharmacy</option>
+            <option value="Used clothing">Used clothing</option>
+            <option value="Taxable misc.">Taxable misc.</option>
+            <option value="Haircare">Haircare</option>
           </select>
         </div>
         <div class="form-group">

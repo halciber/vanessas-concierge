@@ -412,13 +412,43 @@ class FileSystemManager {
     }
 
     const fileContent = await this.readTextFile(['expenses'], 'expenses.json');
-    if (!fileContent) return [];
+    if (!fileContent) {
+      // First run (e.g. hosted guest mode): seed the demo expenses.
+      // A user who deletes everything gets an empty file, not a re-seed.
+      const defaults = this.getDefaultExpenses();
+      await this.saveExpenses(defaults);
+      return defaults;
+    }
     try {
       return JSON.parse(fileContent);
     } catch (e) {
       console.error("Failed to parse expenses.json", e);
       return [];
     }
+  }
+
+  // Mirrors data/expenses/expenses.json (drawn from the real guardian report,
+  // sanitized), with dates relative to today so the demo stays current
+  getDefaultExpenses() {
+    const rel = (offsetDays) => {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      return toLocalDateString(d);
+    };
+    return [
+      { id: 'exp-def-1', date: rel(-1), description: 'ALDI', category: 'Groceries', amount: 27.51, status: 'SNAP' },
+      { id: 'exp-def-2', date: rel(-2), description: "McDonald's", category: 'Food/Meal', amount: 6.89, status: 'Client Cash' },
+      { id: 'exp-def-3', date: rel(-3), description: 'Walmart', category: 'Groceries and misc. house goods', amount: 54.70, status: 'Debit' },
+      { id: 'exp-def-4', date: rel(-4), description: 'WellAbility', category: 'Cash for activities', amount: 10.00, status: 'Provider Cash' },
+      { id: 'exp-def-5', date: rel(-6), description: 'Michaels', category: 'Crafts/Supplies', amount: 6.41, status: 'Debit' },
+      { id: 'exp-def-6', date: rel(-6), description: 'Fiesta Acapulco', category: 'Food/Meal', amount: 15.75, status: 'Client Cash' },
+      { id: 'exp-def-7', date: rel(-8), description: 'CVS', category: 'Misc./Pharmacy', amount: 3.18, status: 'Debit' },
+      { id: 'exp-def-8', date: rel(-9), description: 'Ulta Beauty Salon', category: 'Haircare', amount: 15.00, status: 'Provider Cash' },
+      { id: 'exp-def-9', date: rel(-11), description: 'Dollar Tree', category: 'Misc. household goods', amount: 6.24, status: 'Debit' },
+      { id: 'exp-def-10', date: rel(-12), description: 'Giant Eagle', category: 'Groceries', amount: 19.38, status: 'SNAP' },
+      { id: 'exp-def-11', date: rel(-13), description: 'Deja Vu', category: 'Used clothing', amount: 11.29, status: 'Client Cash' },
+      { id: 'exp-def-12', date: rel(-14), description: 'Five Below', category: 'Taxable misc.', amount: 7.47, status: 'Debit' }
+    ];
   }
 
   async saveExpenses(expensesList) {

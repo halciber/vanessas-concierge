@@ -3,56 +3,120 @@
     "id": "1782896584648",
     "date": "2026-07-01",
     "description": "Walmart",
-    "category": "Supplies",
+    "category": "Groceries and misc. house goods",
     "amount": 75,
     "status": "Debit"
   },
   {
-    "id": "7",
+    "id": "101",
     "date": "2026-06-29",
-    "description": "Groceries - Kroger",
-    "category": "Supplies",
-    "amount": 62.35,
+    "description": "McDonald's",
+    "category": "Food/Meal",
+    "amount": 6.89,
+    "status": "Client Cash"
+  },
+  {
+    "id": "102",
+    "date": "2026-06-26",
+    "description": "ALDI",
+    "category": "Groceries",
+    "amount": 27.51,
     "status": "SNAP"
   },
   {
-    "id": "1",
-    "date": "2026-06-25",
-    "description": "Weekly Home Care Visit",
-    "category": "Services",
-    "amount": 450,
-    "status": "Provider Cash"
-  },
-  {
-    "id": "2",
-    "date": "2026-06-24",
-    "description": "Medical Supplies - Pharmacy",
-    "category": "Health",
-    "amount": 84.2,
-    "status": "Client Cash"
-  },
-  {
-    "id": "3",
-    "date": "2026-06-22",
-    "description": "Gentle Mobility Session",
-    "category": "Services",
-    "amount": 120,
-    "status": "Provider Cash"
-  },
-  {
-    "id": "4",
-    "date": "2026-06-18",
-    "description": "Subscription - Wellness Hub",
-    "category": "Digital",
-    "amount": 29.99,
+    "id": "103",
+    "date": "2026-06-26",
+    "description": "Walmart",
+    "category": "Groceries and misc. house goods",
+    "amount": 54.7,
     "status": "Debit"
   },
   {
-    "id": "5",
-    "date": "2026-06-15",
-    "description": "Physical Therapy Evaluation",
-    "category": "Health",
-    "amount": 210,
+    "id": "104",
+    "date": "2026-06-24",
+    "description": "WellAbility",
+    "category": "Cash for activities",
+    "amount": 10,
+    "status": "Provider Cash"
+  },
+  {
+    "id": "105",
+    "date": "2026-06-22",
+    "description": "Michaels",
+    "category": "Crafts/Supplies",
+    "amount": 6.41,
+    "status": "Debit"
+  },
+  {
+    "id": "106",
+    "date": "2026-06-22",
+    "description": "Fiesta Acapulco",
+    "category": "Food/Meal",
+    "amount": 15.75,
     "status": "Client Cash"
+  },
+  {
+    "id": "107",
+    "date": "2026-06-21",
+    "description": "CVS",
+    "category": "Misc./Pharmacy",
+    "amount": 3.18,
+    "status": "Debit"
+  },
+  {
+    "id": "108",
+    "date": "2026-06-21",
+    "description": "Sally Beauty",
+    "category": "Hair/Beauty supplies",
+    "amount": 7.46,
+    "status": "Debit"
+  },
+  {
+    "id": "109",
+    "date": "2026-06-19",
+    "description": "Ulta Beauty Salon",
+    "category": "Haircare",
+    "amount": 15,
+    "status": "Provider Cash"
+  },
+  {
+    "id": "110",
+    "date": "2026-06-15",
+    "description": "Chipotle",
+    "category": "Food/Meal",
+    "amount": 9.35,
+    "status": "Client Cash"
+  },
+  {
+    "id": "111",
+    "date": "2026-06-12",
+    "description": "Five Below",
+    "category": "Taxable misc.",
+    "amount": 7.47,
+    "status": "Debit"
+  },
+  {
+    "id": "112",
+    "date": "2026-06-10",
+    "description": "Deja Vu",
+    "category": "Used clothing",
+    "amount": 11.29,
+    "status": "Client Cash"
+  },
+  {
+    "id": "113",
+    "date": "2026-06-09",
+    "description": "Dollar Tree",
+    "category": "Misc. household goods",
+    "amount": 6.24,
+    "status": "Debit"
+  },
+  {
+    "id": "114",
+    "date": "2026-06-09",
+    "description": "Giant Eagle",
+    "category": "Groceries",
+    "amount": 19.38,
+    "status": "SNAP"
   }
 ]

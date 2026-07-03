@@ -943,6 +943,20 @@ body {
   border-radius: var(--rounded-pill);
 }
 
+/* Standardized purchase descriptions */
+.tag-groceries { background-color: #ebf6f2; color: var(--tertiary); }
+.tag-groceries-and-misc-house-goods { background-color: #e8f3ec; color: #2e6b4f; }
+.tag-food-meal { background-color: #fff4e6; color: #b26a00; }
+.tag-cash-for-activities { background-color: #ead9fe; color: var(--secondary); }
+.tag-misc-household-goods { background-color: #f1f1f2; color: #6d6d72; }
+.tag-hair-beauty-supplies { background-color: #fde7f1; color: #ad1457; }
+.tag-crafts-supplies { background-color: #f7f1fe; color: var(--secondary); }
+.tag-misc-pharmacy { background-color: #fff0f1; color: var(--error); }
+.tag-used-clothing { background-color: #e3f0fd; color: #1565c0; }
+.tag-taxable-misc { background-color: #fff9e6; color: #a87900; }
+.tag-haircare { background-color: #fde7f1; color: #c2185b; }
+
+/* Legacy categories kept for older data */
 .tag-services { background-color: #f7f1fe; color: var(--secondary); }
 .tag-health { background-color: #fff0f1; color: var(--error); }
 .tag-digital { background-color: #ebf6f2; color: var(--tertiary); }
