@@ -11,3 +11,6 @@ __pycache__/
 # Local secrets (never commit API keys)
 *.secret
 .env
+
+# Local Claude Code session settings
+.claude/
