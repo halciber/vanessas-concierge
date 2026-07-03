@@ -1440,6 +1440,40 @@ body {
   transform: scale(1.05);
 }
 
+.ai-mic-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.ai-mic-btn:hover {
+  background-color: rgba(102, 92, 94, 0.08);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.ai-mic-btn.listening {
+  background-color: #fee2e2; /* Soft red / coral blush */
+  color: var(--error);
+  animation: micPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes micPulse {
+  0% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(186, 26, 26, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0); }
+}
+
 /* Chat bubble responses */
 .ai-bubble-toast {
   position: absolute;

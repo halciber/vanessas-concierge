@@ -11,10 +11,11 @@ class GeminiAgentManager {
     this.chatHistory = [];
     this.systemInstruction = `You are "Care Assistant", a gentle, supportive personal concierge and assistant for Vanessa. 
 Vanessa takes care of special needs adults and needs a clean, low-stress, organized workspace. 
-Your goal is to help her manage her day, schedule events, complete tasks (checklist items), manage reminders (brief notes, alerts, or warnings), manage daily routines (checklist items for specific days of the week), log journal entries (including work start/end times and mileage), and track expenses. 
+Your goal is to help her manage her day, schedule events, complete tasks (checklist items), manage reminders (brief notes, alerts, or warnings), manage daily routines (checklist items for specific days of the week), log journal entries (including work start/end times and mileage), track expenses, and compile billing reports. 
 Use the 'addTodoItem' tool for actionable tasks on her To-Do list, 'addReminder' for notifications, quick alerts, or warnings (like calling someone or renewals), and 'addDailyRoutineItem' / 'removeDailyRoutineItem' / 'listDailyRoutine' to manage daily routine items (like Client hygiene or Pet care) for specific days of the week.
 For expenses, use 'logExpense' to record new ones, and 'updateExpense' / 'deleteExpense' to correct or remove existing ones. When updating or deleting, call 'listExpenses' first if you are unsure which expense matches, and ask Vanessa to clarify if several could match.
 Expense records go into a monthly report for the client's guardian, so they follow a standard: the expense description is the STORE/VENDOR name, and the category is the standardized purchase description. Known vendors and their standard descriptions: ALDI = Groceries; Walmart = Groceries and misc. house goods; McDonald's = Food/Meal; WellAbility = Cash for activities; Fiesta Acapulco = Food/Meal; Giant Eagle = Groceries; Chipotle = Food/Meal; Dollar Tree = Misc. household goods; Sally Beauty = Hair/Beauty supplies; Michaels = Crafts/Supplies; CVS = Misc./Pharmacy; Deja Vu = Used clothing; Five Below = Taxable misc.; Ulta Beauty Salon = Haircare.
+To generate or compile billing reports for work sessions, use the 'compileBillingReport' tool with the start and end dates.
 
 You can perform actions on her behalf using the tools provided. When an action is completed, explain what you did in a warm, friendly, and reassuring tone. 
 Avoid jargon. Keep responses concise and supportive. Always assume the current year is 2026.`;
@@ -200,6 +201,18 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
               },
               required: ["dayOfWeek"]
             }
+          },
+          {
+            name: "compileBillingReport",
+            description: "Compile a billing report for Vanessa for a specific date range. It calculates hours, mileage, and DODD units from journal entries.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                startDate: { type: "STRING", description: "The start date of the range in YYYY-MM-DD format, e.g. '2026-06-22'." },
+                endDate: { type: "STRING", description: "The end date of the range in YYYY-MM-DD format, e.g. '2026-06-28'." }
+              },
+              required: ["startDate", "endDate"]
+            }
           }
         ]
       }
@@ -221,7 +234,8 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
       listReminders: null,
       addDailyRoutineItem: null,
       removeDailyRoutineItem: null,
-      listDailyRoutine: null
+      listDailyRoutine: null,
+      compileBillingReport: null
     };
   }
 
@@ -674,6 +688,54 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
         } catch (e) {
           text = `✨ **(Offline Demo Mode)** Sorry, I couldn't read your routine for ${dayOfWeek}.`;
         }
+      }
+    }
+    // 7.9 Compile Billing Report
+    else if (msg.includes("compile") || msg.includes("billing") || msg.includes("report")) {
+      let startDate = "";
+      let endDate = "";
+      
+      const dateRegex = /(\d{4}-\d{2}-\d{2})/g;
+      const dates = msg.match(dateRegex);
+      if (dates && dates.length >= 2) {
+        startDate = dates[0];
+        endDate = dates[1];
+      } else {
+        const today = new Date();
+        const day = today.getDay();
+        
+        if (msg.includes("last week")) {
+          // Last week: Monday to Sunday of previous week
+          const start = new Date(today);
+          start.setDate(today.getDate() - day - 6); // Monday of last week
+          const end = new Date(today);
+          end.setDate(today.getDate() - day); // Sunday of last week
+          startDate = toLocalDateString(start);
+          endDate = toLocalDateString(end);
+        } else if (msg.includes("this week")) {
+          // This week: Monday to Sunday of current week
+          const start = new Date(today);
+          start.setDate(today.getDate() - (day === 0 ? 6 : day - 1)); // Monday
+          const end = new Date(today);
+          end.setDate(today.getDate() - (day === 0 ? 0 : day - 7)); // Sunday
+          startDate = toLocalDateString(start);
+          endDate = toLocalDateString(end);
+        } else {
+          // Default range: last 7 days
+          const start = new Date(today);
+          start.setDate(today.getDate() - 7);
+          startDate = toLocalDateString(start);
+          endDate = toLocalDateString(today);
+        }
+      }
+      
+      if (this.callbacks.compileBillingReport) {
+        const args = { startDate, endDate };
+        await this.callbacks.compileBillingReport(args);
+        actions.push({ type: 'compileBillingReport', args });
+        text = `✨ **(Offline Demo Mode)** I've compiled your billing report from **${startDate}** to **${endDate}** and opened the summary modal.`;
+      } else {
+        text = `✨ **(Offline Demo Mode)** I detected a billing report command, but the application callback is not ready.`;
       }
     }
     // 8. Generic response

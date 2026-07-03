@@ -72,6 +72,9 @@ class AppController {
     // 4. Bind UI Event listeners
     this.bindEvents();
 
+    // Initialize Speech Recognition for the AI prompt
+    this.initSpeechRecognition();
+
     // 5. Load Settings UI values
     this.loadSettingsUI();
 
@@ -1954,6 +1957,27 @@ class AppController {
           activity: item.activity,
           completed: item.completed
         }));
+      },
+
+      // 13. Tool to compile billing reports
+      compileBillingReport: async (args) => {
+        const startDate = args.startDate;
+        const endDate = args.endDate;
+        if (!startDate || !endDate) {
+          throw new Error("startDate and endDate parameters are required to compile a billing report.");
+        }
+
+        // Set the active billing dates in the controller state
+        this.selectedStartDate = startDate;
+        this.selectedEndDate = endDate;
+
+        // Switch to the billing page in UI
+        this.switchPage('billing');
+
+        // Compile, save, and show the report modal
+        await this.compileBillingReport({ save: true, openModal: true });
+
+        return { status: "success", range: `${startDate} to ${endDate}` };
       }
     };
 
@@ -2024,6 +2048,124 @@ class AppController {
       bubbleText.innerHTML = `<span style="color: var(--error); font-weight: 700;"><i data-lucide="alert-triangle"></i> Error:</span> ${e.message || "Failed to communicate with AI Assistant."}`;
       lucide.createIcons();
     }
+  }
+
+  // Initialize Speech Recognition (Web Speech API)
+  initSpeechRecognition() {
+    const micBtn = document.getElementById('ai-chat-mic-btn');
+    const chatInput = document.getElementById('ai-chat-input');
+    if (!micBtn || !chatInput) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      // Speech recognition not supported in this browser
+      micBtn.style.display = 'none';
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    let isListening = false;
+    let silenceTimer = null;
+
+    const resetSilenceTimer = () => {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        console.log("Speech recognition stopped due to silence.");
+        recognition.stop();
+      }, 3500); // 3.5 seconds of silence
+    };
+
+    const clearSilenceTimer = () => {
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        silenceTimer = null;
+      }
+    };
+
+    micBtn.addEventListener('click', () => {
+      if (isListening) {
+        recognition.stop();
+      } else {
+        chatInput.value = ''; // Clear previous input before recording
+        try {
+          recognition.start();
+        } catch (e) {
+          console.error("Speech recognition start failed:", e);
+        }
+      }
+    });
+
+    recognition.onstart = () => {
+      isListening = true;
+      micBtn.classList.add('listening');
+      micBtn.title = 'Stop listening & submit';
+      micBtn.dataset.oldPlaceholder = chatInput.placeholder;
+      chatInput.placeholder = 'Listening... Speak now';
+      
+      const icon = micBtn.querySelector('i');
+      if (icon) {
+        icon.setAttribute('data-lucide', 'mic-off');
+        lucide.createIcons();
+      }
+
+      // Start initial silence timer
+      resetSilenceTimer();
+    };
+
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      for (let i = 0; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      
+      chatInput.value = (finalTranscript + interimTranscript).trim();
+      
+      // Reset silence timer on any transcription result
+      resetSilenceTimer();
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      clearSilenceTimer();
+      if (event.error === 'not-allowed') {
+        this.showToast("Microphone permission denied.");
+      } else if (event.error !== 'aborted') {
+        this.showToast(`Speech error: ${event.error}`);
+      }
+    };
+
+    recognition.onend = () => {
+      isListening = false;
+      micBtn.classList.remove('listening');
+      micBtn.title = 'Speak to assistant';
+      if (micBtn.dataset.oldPlaceholder) {
+        chatInput.placeholder = micBtn.dataset.oldPlaceholder;
+      }
+
+      const icon = micBtn.querySelector('i');
+      if (icon) {
+        icon.setAttribute('data-lucide', 'mic');
+        lucide.createIcons();
+      }
+
+      clearSilenceTimer();
+
+      // Auto-submit if there's transcribed text
+      if (chatInput.value.trim()) {
+        this.submitAIChat();
+      }
+    };
   }
 
   // Simple markdown conversion helper for UI
