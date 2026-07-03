@@ -835,12 +835,6 @@ class AppController {
     document.getElementById('expense-total-week').textContent = `$${weeklyTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     document.getElementById('expense-total-month').textContent = `$${monthlyTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
-    // Progress bar for budget
-    const targetBudget = 5000; // Mock target budget
-    const percentage = Math.min(Math.round((monthlyTotal / targetBudget) * 100), 100);
-    document.getElementById('expense-budget-percentage').textContent = `${percentage}% of monthly budget ($${targetBudget.toLocaleString()})`;
-    document.getElementById('expense-budget-bar').style.width = `${percentage}%`;
-
     lucide.createIcons();
   }
 
