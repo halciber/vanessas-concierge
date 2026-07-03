@@ -4,6 +4,21 @@
  * Provides fallback to LocalStorage if the API is unsupported or access is denied.
  */
 
+// Date helpers shared by all modules. Date-only strings must be formatted and
+// parsed in LOCAL time: toISOString()/new Date("YYYY-MM-DD") use UTC, which
+// shifts evening timestamps and 1st-of-month dates into the wrong day.
+function toLocalDateString(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function parseLocalDate(dateStr) {
+  const [y, m, d] = String(dateStr).split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+window.toLocalDateString = toLocalDateString;
+window.parseLocalDate = parseLocalDate;
+
 const DEFAULT_FIREBASE_CONFIG = {
   apiKey: "AIzaSyCBel0QehveOEeocK5Mf3T2scZJA5ij17Y",
   authDomain: "vanessa-s-concierge.firebaseapp.com",
@@ -436,7 +451,7 @@ class FileSystemManager {
   async addExpense(expense) {
     const newExpense = {
       id: expense.id || Date.now().toString(),
-      date: expense.date || new Date().toISOString().split('T')[0],
+      date: expense.date || toLocalDateString(),
       description: expense.description || "",
       category: expense.category || "Services",
       amount: Number(expense.amount) || 0.0,
@@ -568,7 +583,7 @@ class FileSystemManager {
           id: task.id,
           title: task.title,
           status: task.status || 'needsAction',
-          created_at: task.created_at || new Date().toISOString().split('T')[0],
+          created_at: task.created_at || toLocalDateString(),
           completed_at: task.completed_at || null,
           description: task.description || `# Task: ${task.title}`
         });
@@ -582,7 +597,7 @@ class FileSystemManager {
     const metadata = {
       title: task.title,
       status: task.status || 'needsAction',
-      created_at: task.created_at || new Date().toISOString().split('T')[0]
+      created_at: task.created_at || toLocalDateString()
     };
     if (task.completed_at) {
       metadata.completed_at = task.completed_at;
@@ -757,7 +772,7 @@ class FileSystemManager {
           title: reminder.title,
           text: reminder.text,
           type: reminder.type || 'note',
-          date: reminder.date || new Date().toISOString().split('T')[0]
+          date: reminder.date || toLocalDateString()
         });
         return;
       } catch (e) {
@@ -769,7 +784,7 @@ class FileSystemManager {
     const metadata = {
       title: reminder.title,
       type: reminder.type || 'note',
-      date: reminder.date || new Date().toISOString().split('T')[0]
+      date: reminder.date || toLocalDateString()
     };
     const fileContent = this.generateMarkdownWithFrontmatter(metadata, reminder.text);
     await this.writeTextFile(['reminders'], filename, fileContent);
@@ -900,7 +915,7 @@ class FileSystemManager {
   }
 
   getDefaultTasks() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString();
     return [
       { id: 'task-def-1', title: "Pick up John's prescription refill", status: 'needsAction', created_at: today },
       { id: 'task-def-2', title: 'Submit weekly meal plan to guardian', status: 'needsAction', created_at: today },
@@ -911,7 +926,7 @@ class FileSystemManager {
   }
 
   getDefaultReminders() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString();
     return [
       { id: 'rem-def-1', title: 'Critical Update', text: "Call pharmacy for John's prescription renewal.", type: 'critical', date: today },
       { id: 'rem-def-2', title: 'Note', text: 'Mild knee pain reported by John after therapy.', type: 'note', date: today },

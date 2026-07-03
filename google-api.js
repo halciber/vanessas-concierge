@@ -105,11 +105,11 @@ class GoogleAPIManager {
   // Mock Data Generators for Fallback / Demonstration
   // ----------------------------------------------------
   initMockData() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString();
     const getRelativeDate = (offsetDays) => {
       const d = new Date();
       d.setDate(d.getDate() + offsetDays);
-      return d.toISOString().split('T')[0];
+      return toLocalDateString(d);
     };
 
     if (!localStorage.getItem(this.mockCalendarKey)) {

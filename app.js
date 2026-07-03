@@ -312,7 +312,7 @@ class AppController {
         const localTsk = localTasks.find(t => t.id === id);
         if (localTsk) {
           localTsk.status = 'completed';
-          localTsk.completed_at = new Date().toISOString().split('T')[0];
+          localTsk.completed_at = toLocalDateString();
           await fileSystem.saveTask(localTsk);
         }
 
@@ -464,7 +464,7 @@ class AppController {
     
     // Set formatted header date to today
     const today = new Date();
-    const dateStr = today.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(today);
     this.currentJournalDate = dateStr;
     
     const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
@@ -498,8 +498,8 @@ class AppController {
     // Fetch last year's entries
     const now = new Date();
     const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-    const startDateStr = oneYearAgo.toISOString().split('T')[0];
-    const endDateStr = now.toISOString().split('T')[0];
+    const startDateStr = toLocalDateString(oneYearAgo);
+    const endDateStr = toLocalDateString(now);
     
     const entries = await fileSystem.getJournalEntriesInRange(startDateStr, endDateStr);
     
@@ -579,7 +579,7 @@ class AppController {
     document.getElementById('journal-current-date').textContent = dateObj.toLocaleDateString('en-US', options);
 
     // Toggle date warning banner
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = toLocalDateString();
     const banner = document.getElementById('journal-date-warning-banner');
     if (banner) {
       if (date !== todayStr) {
@@ -640,7 +640,7 @@ class AppController {
   }
 
   async saveJournalToday() {
-    const dateStr = this.currentJournalDate || new Date().toISOString().split('T')[0];
+    const dateStr = this.currentJournalDate || toLocalDateString();
     const entryId = this.currentJournalId || `${dateStr}-${Date.now()}`;
     
     const editor = document.getElementById('journal-text-editor');
@@ -688,8 +688,8 @@ class AppController {
     const now = new Date();
     const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
     
-    const startDateStr = oneYearAgo.toISOString().split('T')[0];
-    const endDateStr = now.toISOString().split('T')[0];
+    const startDateStr = toLocalDateString(oneYearAgo);
+    const endDateStr = toLocalDateString(now);
 
     const entries = await fileSystem.getJournalEntriesInRange(startDateStr, endDateStr);
 
@@ -819,7 +819,7 @@ class AppController {
     const thisYear = now.getFullYear();
 
     expenses.forEach(exp => {
-      const expDate = new Date(exp.date);
+      const expDate = parseLocalDate(exp.date);
       const amt = Number(exp.amount) || 0.0;
 
       // Weekly check
@@ -844,7 +844,7 @@ class AppController {
     document.getElementById('exp-desc').value = expense ? expense.description : '';
     document.getElementById('exp-category').value = expense ? expense.category : 'Services';
     document.getElementById('exp-amount').value = expense ? expense.amount : '';
-    document.getElementById('exp-date').value = expense ? expense.date : new Date().toISOString().split('T')[0];
+    document.getElementById('exp-date').value = expense ? expense.date : toLocalDateString();
     document.getElementById('exp-status').value = (expense && expense.status !== 'Paid') ? 'Pending' : 'Paid';
     document.getElementById('expense-modal-title').textContent = expense ? 'Edit Expense' : 'Record New Expense';
     document.getElementById('expense-modal-save-text').textContent = expense ? 'Save Changes' : 'Record Expense';
@@ -1478,7 +1478,7 @@ class AppController {
           id: taskId,
           title: title,
           status: 'needsAction',
-          created_at: new Date().toISOString().split('T')[0]
+          created_at: toLocalDateString()
         };
         await fileSystem.saveTask(localTask);
 
@@ -1583,7 +1583,7 @@ class AppController {
         
         // Auto-save the journal log!
         const today = new Date();
-        const dateStr = today.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(today);
         const entryId = `${dateStr}-${Date.now()}`;
         const metadata = {
           client: clientInput.value,
@@ -1608,7 +1608,7 @@ class AppController {
         const amt = Number(args.amount) || 0.0;
         const desc = args.description || "Misc Supplies";
         
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = toLocalDateString();
         
         await fileSystem.addExpense({
           date: todayStr,
@@ -1753,7 +1753,7 @@ class AppController {
           title: args.title || 'Note',
           text: args.text,
           type: args.type || 'note',
-          date: new Date().toISOString().split('T')[0]
+          date: toLocalDateString()
         };
         await fileSystem.saveReminder(localReminder);
 

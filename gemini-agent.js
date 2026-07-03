@@ -476,7 +476,7 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
     // 2. Calendar Event Creation
     else if ((msg.includes("schedule") || msg.includes("add") || msg.includes("appointment")) && (msg.includes("event") || msg.includes("appointment") || msg.includes("calendar"))) {
       let summary = extractQuote(userMessage) || "New Event";
-      const today = new Date().toISOString().split('T')[0];
+      const today = toLocalDateString();
       
       // Basic time inference
       let startDateTime = `${today}T13:00:00`;
