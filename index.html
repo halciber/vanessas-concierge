@@ -264,6 +264,7 @@
                 <th>Category</th>
                 <th>Amount</th>
                 <th>Status</th>
+                <th style="text-align: right;">Actions</th>
               </tr>
             </thead>
             <tbody id="expenses-table-body">
@@ -542,7 +543,7 @@
   <div class="modal" id="add-expense-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Record New Expense</h4>
+        <h4 class="modal-title" id="expense-modal-title">Record New Expense</h4>
         <button class="modal-close" id="expense-modal-close"><i data-lucide="x"></i></button>
       </div>
       <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -570,10 +571,17 @@
           <label class="form-label" for="exp-date">Date</label>
           <input type="date" class="form-input" id="exp-date">
         </div>
+        <div class="form-group">
+          <label class="form-label" for="exp-status">Status</label>
+          <select class="form-input" id="exp-status" style="background-image: none;">
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="expense-modal-cancel">Cancel</button>
-        <button class="btn btn-primary" id="expense-modal-save">Record Expense</button>
+        <button class="btn btn-primary" id="expense-modal-save"><span id="expense-modal-save-text">Record Expense</span></button>
       </div>
     </div>
   </div>

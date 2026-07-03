@@ -13,6 +13,7 @@ class GeminiAgentManager {
 Vanessa takes care of special needs adults and needs a clean, low-stress, organized workspace. 
 Your goal is to help her manage her day, schedule events, complete tasks (checklist items), manage reminders (brief notes, alerts, or warnings), manage daily routines (checklist items for specific days of the week), log journal entries (including work start/end times and mileage), and track expenses. 
 Use the 'addTodoItem' tool for actionable tasks on her To-Do list, 'addReminder' for notifications, quick alerts, or warnings (like calling someone or renewals), and 'addDailyRoutineItem' / 'removeDailyRoutineItem' / 'listDailyRoutine' to manage daily routine items (like Client hygiene or Pet care) for specific days of the week.
+For expenses, use 'logExpense' to record new ones, and 'updateExpense' / 'deleteExpense' to correct or remove existing ones. When updating or deleting, call 'listExpenses' first if you are unsure which expense matches, and ask Vanessa to clarify if several could match.
 
 You can perform actions on her behalf using the tools provided. When an action is completed, explain what you did in a warm, friendly, and reassuring tone. 
 Avoid jargon. Keep responses concise and supportive. Always assume the current year is 2026.`;
@@ -83,6 +84,44 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
                 amount: { type: "NUMBER", description: "Cost of the item in USD, e.g., 84.20." }
               },
               required: ["description", "category", "amount"]
+            }
+          },
+          {
+            name: "listExpenses",
+            description: "Retrieve the list of recorded expenses (with their expense_id values) to answer questions or to find the right expense before updating or deleting it.",
+            parameters: {
+              type: "OBJECT",
+              properties: {},
+              required: []
+            }
+          },
+          {
+            name: "updateExpense",
+            description: "Correct an existing expense. Identify it by expense_id (preferred; get it from listExpenses) or by a matching description. Only the provided new_* fields are changed.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                expense_id: { type: "STRING", description: "The id of the expense to update, from listExpenses." },
+                description: { type: "STRING", description: "Text to match against the expense description if no expense_id is given, e.g. 'Walmart'." },
+                new_description: { type: "STRING", description: "New description text, if it should change." },
+                new_amount: { type: "NUMBER", description: "New amount in USD, if it should change." },
+                new_category: { type: "STRING", description: "New category: 'Services', 'Health', 'Digital', or 'Supplies'." },
+                new_date: { type: "STRING", description: "New date in YYYY-MM-DD format, if it should change." },
+                new_status: { type: "STRING", description: "New payment status: 'Paid' or 'Pending'." }
+              },
+              required: []
+            }
+          },
+          {
+            name: "deleteExpense",
+            description: "Remove a recorded expense. Identify it by expense_id (preferred; get it from listExpenses) or by a matching description.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                expense_id: { type: "STRING", description: "The id of the expense to delete, from listExpenses." },
+                description: { type: "STRING", description: "Text to match against the expense description if no expense_id is given, e.g. 'pharmacy'." }
+              },
+              required: []
             }
           },
           {
@@ -171,6 +210,9 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
       deleteCalendarEvent: null,
       logJournalEntry: null,
       logExpense: null,
+      listExpenses: null,
+      updateExpense: null,
+      deleteExpense: null,
       listCalendarEvents: null,
       listTodoItems: null,
       addReminder: null,
@@ -497,6 +539,22 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
         await this.callbacks.logJournalEntry(args);
         actions.push({ type: 'logJournalEntry', args });
         text = `✨ **(Offline Demo Mode)** I've logged today's journal with **${mileage} miles** and hours **${start_time} - ${end_time}** for client ${client}.`;
+      }
+    }
+    // 5a. Delete Expense (checked before logging, since both phrasings mention "expense")
+    else if ((msg.includes("delete") || msg.includes("remove")) && msg.includes("expense")) {
+      if (this.callbacks.deleteExpense) {
+        const description = extractQuote(userMessage) ||
+          userMessage.replace(/.*?(?:delete|remove)\s+(?:the\s+)?/i, '').replace(/\s*expense.*$/i, '').trim();
+        const result = await this.callbacks.deleteExpense({ description });
+        actions.push({ type: 'deleteExpense', args: { description } });
+        if (result && result.status === 'deleted') {
+          text = `✨ **(Offline Demo Mode)** I've removed the **"${result.description}"** expense of **$${Number(result.amount).toFixed(2)}**.`;
+        } else if (result && result.error) {
+          text = `✨ **(Offline Demo Mode)** ${result.error}`;
+        } else {
+          text = `✨ **(Offline Demo Mode)** I couldn't find an expense matching **"${description}"**.`;
+        }
       }
     }
     // 5. Log Expense

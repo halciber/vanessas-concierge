@@ -459,6 +459,49 @@ class FileSystemManager {
     return expenses;
   }
 
+  async updateExpense(expenseId, updates) {
+    const expenses = await this.getExpenses();
+    const idx = expenses.findIndex(e => String(e.id) === String(expenseId));
+    if (idx === -1) return null;
+
+    const updated = { ...expenses[idx], ...updates, id: expenses[idx].id };
+    updated.amount = Number(updated.amount) || 0.0;
+    expenses[idx] = updated;
+
+    if (this.cloudAvailable) {
+      try {
+        await this.userDocRef.collection('expenses').doc(String(updated.id)).set(updated);
+        return updated;
+      } catch (e) {
+        console.error("Firestore updateExpense failed:", e);
+      }
+    }
+
+    expenses.sort((a, b) => b.date.localeCompare(a.date));
+    await this.saveExpenses(expenses);
+    return updated;
+  }
+
+  async deleteExpense(expenseId) {
+    const expenses = await this.getExpenses();
+    const idx = expenses.findIndex(e => String(e.id) === String(expenseId));
+    if (idx === -1) return null;
+
+    const removed = expenses.splice(idx, 1)[0];
+
+    if (this.cloudAvailable) {
+      try {
+        await this.userDocRef.collection('expenses').doc(String(removed.id)).delete();
+        return removed;
+      } catch (e) {
+        console.error("Firestore deleteExpense failed:", e);
+      }
+    }
+
+    await this.saveExpenses(expenses);
+    return removed;
+  }
+
   // ----------------------------------------------------
   // Tasks Operations
   // ----------------------------------------------------

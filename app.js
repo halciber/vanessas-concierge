@@ -11,6 +11,7 @@ class AppController {
     this.selectedEndDate = null;
     this.currentJournalDate = null;
     this.currentJournalId = null;
+    this.editingExpenseId = null;
     
     // Calendar month states for billing selector
     const now = new Date();
@@ -768,7 +769,7 @@ class AppController {
 
     // Renders list
     if (filteredExpenses.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); font-style: italic;">No expenses found matching the filter.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); font-style: italic;">No expenses found matching the filter.</td></tr>';
     } else {
       filteredExpenses.forEach(exp => {
         const catClass = `tag-${exp.category.toLowerCase()}`;
@@ -781,11 +782,30 @@ class AppController {
             <td><span class="tag ${catClass}">${exp.category}</span></td>
             <td>$${Number(exp.amount).toFixed(2)}</td>
             <td><span class="pill-status ${statusClass}">${exp.status}</span></td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button class="action-icon-btn expense-edit-btn" data-id="${exp.id}" title="Edit expense"><i data-lucide="pencil"></i></button>
+              <button class="action-icon-btn expense-delete-btn" data-id="${exp.id}" title="Delete expense"><i data-lucide="trash-2"></i></button>
+            </td>
           </tr>
         `;
         tableBody.insertAdjacentHTML('beforeend', row);
       });
     }
+
+    // Bind row action buttons
+    tableBody.querySelectorAll('.expense-edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const exp = expenses.find(e => String(e.id) === btn.getAttribute('data-id'));
+        if (exp) this.openExpenseModal(exp);
+      });
+    });
+    tableBody.querySelectorAll('.expense-delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const removed = await fileSystem.deleteExpense(btn.getAttribute('data-id'));
+        this.showToast(removed ? `Deleted "${removed.description}"` : 'Expense not found');
+        await this.loadExpensesData();
+      });
+    });
 
     document.getElementById('expenses-counter-text').textContent = `Showing ${filteredExpenses.length} of ${expenses.length} transactions`;
 
@@ -824,28 +844,54 @@ class AppController {
     lucide.createIcons();
   }
 
+  // Opens the expense modal, either blank (add) or prefilled (edit)
+  openExpenseModal(expense = null) {
+    this.editingExpenseId = expense ? expense.id : null;
+    document.getElementById('exp-desc').value = expense ? expense.description : '';
+    document.getElementById('exp-category').value = expense ? expense.category : 'Services';
+    document.getElementById('exp-amount').value = expense ? expense.amount : '';
+    document.getElementById('exp-date').value = expense ? expense.date : new Date().toISOString().split('T')[0];
+    document.getElementById('exp-status').value = (expense && expense.status !== 'Paid') ? 'Pending' : 'Paid';
+    document.getElementById('expense-modal-title').textContent = expense ? 'Edit Expense' : 'Record New Expense';
+    document.getElementById('expense-modal-save-text').textContent = expense ? 'Save Changes' : 'Record Expense';
+    document.getElementById('add-expense-modal').classList.add('active');
+  }
+
   async recordNewExpense() {
     const desc = document.getElementById('exp-desc').value.trim();
     const category = document.getElementById('exp-category').value;
     const amount = parseFloat(document.getElementById('exp-amount').value) || 0.0;
     const date = document.getElementById('exp-date').value;
+    const status = document.getElementById('exp-status').value;
 
     if (!desc || amount <= 0 || !date) {
       this.showToast("Please fill in all details with valid inputs.");
       return;
     }
 
-    await fileSystem.addExpense({
-      date,
-      description: desc,
-      category,
-      amount,
-      status: 'Paid'
-    });
+    if (this.editingExpenseId) {
+      await fileSystem.updateExpense(this.editingExpenseId, {
+        date,
+        description: desc,
+        category,
+        amount,
+        status
+      });
+      this.editingExpenseId = null;
+      this.showToast("Expense updated!");
+    } else {
+      await fileSystem.addExpense({
+        date,
+        description: desc,
+        category,
+        amount,
+        status
+      });
+      this.showToast("Expense recorded!");
+    }
 
     // Close Modal and Refresh
     document.getElementById('add-expense-modal').classList.remove('active');
-    this.showToast("Expense recorded!");
     await this.loadExpensesData();
   }
 
@@ -1231,9 +1277,7 @@ class AppController {
     });
 
     document.getElementById('expense-add-btn').addEventListener('click', () => {
-      // Set default date in modal
-      document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
-      document.getElementById('add-expense-modal').classList.add('active');
+      this.openExpenseModal();
     });
 
     document.getElementById('expense-modal-close').addEventListener('click', () => {
@@ -1403,6 +1447,33 @@ class AppController {
   // ----------------------------------------------------
   // Client-Side AI Tool Executors Callback Hooks
   // ----------------------------------------------------
+  // Resolves the expense an AI tool call refers to, by id or description match
+  async findExpenseForAgent(args) {
+    const expenses = await fileSystem.getExpenses();
+
+    if (args.expense_id) {
+      const exp = expenses.find(e => String(e.id) === String(args.expense_id));
+      return exp ? { expense: exp } : { error: `No expense found with id ${args.expense_id}. Call listExpenses to see valid ids.` };
+    }
+
+    const needle = (args.description || '').trim().toLowerCase();
+    if (!needle) {
+      return { error: "Provide an expense_id (from listExpenses) or a description to match." };
+    }
+
+    const matches = expenses.filter(e => (e.description || '').toLowerCase().includes(needle));
+    if (matches.length === 0) {
+      return { error: `No expense matches "${args.description}". Call listExpenses to see what is recorded.` };
+    }
+    if (matches.length > 1) {
+      return {
+        error: `Multiple expenses match "${args.description}". Ask which one is meant, or use expense_id.`,
+        candidates: matches.map(e => ({ expense_id: String(e.id), date: e.date, description: e.description, amount: e.amount }))
+      };
+    }
+    return { expense: matches[0] };
+  }
+
   registerAgentCallbacks() {
     const agentCallbacks = {
       // 1. Tool to add checklist items
@@ -1555,6 +1626,50 @@ class AppController {
 
         await this.loadExpensesData();
         return { status: "logged", description: desc, amount: amt, date: todayStr };
+      },
+
+      // 5a. Tool to list recorded expenses
+      listExpenses: async () => {
+        const expenses = await fileSystem.getExpenses();
+        return expenses.map(e => ({
+          expense_id: String(e.id),
+          date: e.date,
+          description: e.description,
+          category: e.category,
+          amount: e.amount,
+          status: e.status
+        }));
+      },
+
+      // 5b. Tool to correct an existing expense
+      updateExpense: async (args) => {
+        const match = await this.findExpenseForAgent(args);
+        if (match.error) return match;
+
+        const updates = {};
+        if (args.new_description !== undefined) updates.description = args.new_description;
+        if (args.new_amount !== undefined) updates.amount = Number(args.new_amount);
+        if (args.new_category !== undefined) updates.category = args.new_category;
+        if (args.new_date !== undefined) updates.date = args.new_date;
+        if (args.new_status !== undefined) updates.status = args.new_status;
+        if (Object.keys(updates).length === 0) {
+          return { error: "No new values were provided; nothing was changed." };
+        }
+
+        const updated = await fileSystem.updateExpense(match.expense.id, updates);
+        await this.loadExpensesData();
+        return { status: "updated", expense_id: String(updated.id), date: updated.date, description: updated.description, category: updated.category, amount: updated.amount, payment_status: updated.status };
+      },
+
+      // 5c. Tool to remove an expense
+      deleteExpense: async (args) => {
+        const match = await this.findExpenseForAgent(args);
+        if (match.error) return match;
+
+        const removed = await fileSystem.deleteExpense(match.expense.id);
+        await this.loadExpensesData();
+        if (!removed) return { error: "The expense could not be deleted." };
+        return { status: "deleted", description: removed.description, amount: removed.amount, date: removed.date };
       },
 
       // 6. Tool to retrieve/read calendar appointments
