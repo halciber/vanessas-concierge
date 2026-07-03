@@ -5,7 +5,15 @@
     "description": "Walmart",
     "category": "Supplies",
     "amount": 75,
-    "status": "Paid"
+    "status": "Debit"
+  },
+  {
+    "id": "7",
+    "date": "2026-06-29",
+    "description": "Groceries - Kroger",
+    "category": "Supplies",
+    "amount": 62.35,
+    "status": "SNAP"
   },
   {
     "id": "1",
@@ -13,7 +21,7 @@
     "description": "Weekly Home Care Visit",
     "category": "Services",
     "amount": 450,
-    "status": "Paid"
+    "status": "Provider Cash"
   },
   {
     "id": "2",
@@ -21,7 +29,7 @@
     "description": "Medical Supplies - Pharmacy",
     "category": "Health",
     "amount": 84.2,
-    "status": "Processing"
+    "status": "Client Cash"
   },
   {
     "id": "3",
@@ -29,7 +37,7 @@
     "description": "Gentle Mobility Session",
     "category": "Services",
     "amount": 120,
-    "status": "Paid"
+    "status": "Provider Cash"
   },
   {
     "id": "4",
@@ -37,7 +45,7 @@
     "description": "Subscription - Wellness Hub",
     "category": "Digital",
     "amount": 29.99,
-    "status": "Paid"
+    "status": "Debit"
   },
   {
     "id": "5",
@@ -45,6 +53,6 @@
     "description": "Physical Therapy Evaluation",
     "category": "Health",
     "amount": 210,
-    "status": "Paid"
+    "status": "Client Cash"
   }
 ]

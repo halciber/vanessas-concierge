@@ -773,7 +773,7 @@ class AppController {
     } else {
       filteredExpenses.forEach(exp => {
         const catClass = `tag-${exp.category.toLowerCase()}`;
-        const statusClass = `status-${exp.status.toLowerCase()}`;
+        const statusClass = `status-${exp.status.toLowerCase().replace(/\s+/g, '-')}`;
 
         const row = `
           <tr>
@@ -845,7 +845,8 @@ class AppController {
     document.getElementById('exp-category').value = expense ? expense.category : 'Services';
     document.getElementById('exp-amount').value = expense ? expense.amount : '';
     document.getElementById('exp-date').value = expense ? expense.date : toLocalDateString();
-    document.getElementById('exp-status').value = (expense && expense.status !== 'Paid') ? 'Pending' : 'Paid';
+    const paymentMethods = ['Debit', 'Client Cash', 'Provider Cash', 'SNAP'];
+    document.getElementById('exp-status').value = (expense && paymentMethods.includes(expense.status)) ? expense.status : 'Debit';
     document.getElementById('expense-modal-title').textContent = expense ? 'Edit Expense' : 'Record New Expense';
     document.getElementById('expense-modal-save-text').textContent = expense ? 'Save Changes' : 'Record Expense';
     document.getElementById('add-expense-modal').classList.add('active');
@@ -1607,19 +1608,20 @@ class AppController {
         const category = args.category || "Supplies";
         const amt = Number(args.amount) || 0.0;
         const desc = args.description || "Misc Supplies";
-        
+        const paymentMethod = args.payment_method || 'Debit';
+
         const todayStr = toLocalDateString();
-        
+
         await fileSystem.addExpense({
           date: todayStr,
           description: desc,
           category,
           amount: amt,
-          status: 'Paid'
+          status: paymentMethod
         });
 
         await this.loadExpensesData();
-        return { status: "logged", description: desc, amount: amt, date: todayStr };
+        return { status: "logged", description: desc, amount: amt, date: todayStr, payment_method: paymentMethod };
       },
 
       // 5a. Tool to list recorded expenses

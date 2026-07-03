@@ -455,7 +455,7 @@ class FileSystemManager {
       description: expense.description || "",
       category: expense.category || "Services",
       amount: Number(expense.amount) || 0.0,
-      status: expense.status || "Paid"
+      status: expense.status || "Debit"
     };
 
     if (this.cloudAvailable) {

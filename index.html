@@ -242,8 +242,10 @@
           <h3 class="card-title" style="margin-bottom: 0;">Recent Entries</h3>
           <div class="filter-group">
             <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="Pending">Pending</button>
-            <button class="filter-btn" data-filter="Paid">Paid</button>
+            <button class="filter-btn" data-filter="Debit">Debit</button>
+            <button class="filter-btn" data-filter="Client Cash">Client Cash</button>
+            <button class="filter-btn" data-filter="Provider Cash">Provider Cash</button>
+            <button class="filter-btn" data-filter="SNAP">SNAP</button>
             <button class="btn btn-primary" id="expense-add-btn" style="padding: 8px 16px;"><i data-lucide="plus"></i> Add Expense</button>
           </div>
         </div>
@@ -256,7 +258,7 @@
                 <th>Description</th>
                 <th>Category</th>
                 <th>Amount</th>
-                <th>Status</th>
+                <th>Payment</th>
                 <th style="text-align: right;">Actions</th>
               </tr>
             </thead>
@@ -565,10 +567,12 @@
           <input type="date" class="form-input" id="exp-date">
         </div>
         <div class="form-group">
-          <label class="form-label" for="exp-status">Status</label>
+          <label class="form-label" for="exp-status">Payment Method</label>
           <select class="form-input" id="exp-status" style="background-image: none;">
-            <option value="Paid">Paid</option>
-            <option value="Pending">Pending</option>
+            <option value="Debit">Debit</option>
+            <option value="Client Cash">Client Cash</option>
+            <option value="Provider Cash">Provider Cash</option>
+            <option value="SNAP">SNAP</option>
           </select>
         </div>
       </div>

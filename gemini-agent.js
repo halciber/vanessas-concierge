@@ -81,7 +81,8 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
               properties: {
                 description: { type: "STRING", description: "What was purchased, e.g., 'Medical Supplies - Pharmacy'." },
                 category: { type: "STRING", description: "Expense category: 'Services', 'Health', 'Digital', or 'Supplies'." },
-                amount: { type: "NUMBER", description: "Cost of the item in USD, e.g., 84.20." }
+                amount: { type: "NUMBER", description: "Cost of the item in USD, e.g., 84.20." },
+                payment_method: { type: "STRING", description: "How it was paid: 'Debit', 'Client Cash', 'Provider Cash', or 'SNAP'. Defaults to 'Debit'.", enum: ["Debit", "Client Cash", "Provider Cash", "SNAP"] }
               },
               required: ["description", "category", "amount"]
             }
@@ -107,7 +108,7 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
                 new_amount: { type: "NUMBER", description: "New amount in USD, if it should change." },
                 new_category: { type: "STRING", description: "New category: 'Services', 'Health', 'Digital', or 'Supplies'." },
                 new_date: { type: "STRING", description: "New date in YYYY-MM-DD format, if it should change." },
-                new_status: { type: "STRING", description: "New payment status: 'Paid' or 'Pending'." }
+                new_status: { type: "STRING", description: "New payment method: 'Debit', 'Client Cash', 'Provider Cash', or 'SNAP'.", enum: ["Debit", "Client Cash", "Provider Cash", "SNAP"] }
               },
               required: []
             }

@@ -956,6 +956,13 @@ body {
   border-radius: var(--rounded-pill);
 }
 
+/* Payment method pills */
+.status-debit { background-color: #ebf6f2; color: var(--tertiary); }
+.status-client-cash { background-color: #ead9fe; color: var(--secondary); }
+.status-provider-cash { background-color: #eddfe2; color: var(--primary); }
+.status-snap { background-color: #e3f0fd; color: #1565c0; }
+
+/* Legacy statuses kept for older data */
 .status-paid { background-color: #ebf6f2; color: var(--tertiary); }
 .status-unpaid { background-color: #fff0f1; color: var(--error); }
 .status-processing { background-color: #f1f1f2; color: #6d6d72; }
