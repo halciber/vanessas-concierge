@@ -137,6 +137,7 @@ class AppController {
       await this.loadExpensesData();
     } else if (pageId === 'billing') {
       this.renderBillingCalendars();
+      await this.loadReportsHistory();
     }
   }
 
@@ -1013,7 +1014,9 @@ class AppController {
     }
   }
 
-  async compileBillingReport() {
+  async compileBillingReport(options = {}) {
+    const { save = true, openModal = true } = options;
+
     if (!this.selectedStartDate || !this.selectedEndDate) {
       this.showToast("Please select a date range first.");
       return;
@@ -1023,14 +1026,16 @@ class AppController {
     const tableBody = document.getElementById('compiled-report-table-body');
     tableBody.innerHTML = '';
 
+    document.getElementById('compiled-report-title').textContent = `Billing Report: ${this.selectedStartDate} to ${this.selectedEndDate}`;
+
     let totalHrsVal = 0.0;
     let totalUnitsVal = 0;
     let totalMileageVal = 0.0;
 
     if (entries.length === 0) {
       tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); font-style: italic;">No journal data found in the selected range. Make sure to log and save journal records.</td></tr>';
-      document.getElementById('compiled-report-card').style.display = 'block';
       this.updateReportTotals(0, 0, 0);
+      if (openModal) this.openCompiledReportModal();
       return;
     }
 
@@ -1057,11 +1062,83 @@ class AppController {
     });
 
     this.updateReportTotals(totalHrsVal, totalUnitsVal, totalMileageVal);
-    document.getElementById('compiled-report-card').style.display = 'block';
-    
-    // Smooth scroll down to compiled report card
-    document.getElementById('compiled-report-card').scrollIntoView({ behavior: 'smooth' });
-    this.showToast("Billing Report Compiled!");
+
+    if (openModal) this.openCompiledReportModal();
+
+    if (save) {
+      // Same range recompiled overwrites its history entry instead of duplicating
+      await fileSystem.saveReport({
+        id: `report-${this.selectedStartDate}-to-${this.selectedEndDate}`,
+        range_start: this.selectedStartDate,
+        range_end: this.selectedEndDate,
+        generated_at: new Date().toISOString(),
+        total_hours: Number(totalHrsVal.toFixed(1)),
+        total_units: totalUnitsVal,
+        total_mileage: Number(totalMileageVal.toFixed(1)),
+        entry_count: entries.length
+      });
+      await this.loadReportsHistory();
+      this.showToast("Billing Report Compiled!");
+    }
+  }
+
+  openCompiledReportModal() {
+    document.getElementById('compiled-report-modal').classList.add('active');
+    lucide.createIcons();
+  }
+
+  async loadReportsHistory() {
+    const listEl = document.getElementById('generated-reports-history-list');
+    if (!listEl) return;
+
+    const reports = await fileSystem.getReports();
+    listEl.innerHTML = '';
+
+    if (reports.length === 0) {
+      listEl.innerHTML = '<div style="color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: 8px;">No reports yet. Select a date range and compile one!</div>';
+      return;
+    }
+
+    reports.forEach(rep => {
+      const genDate = rep.generated_at ? new Date(rep.generated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      const itemHtml = `
+        <div class="report-item">
+          <div class="report-details">
+            <span class="report-name">${rep.range_start} → ${rep.range_end}</span>
+            <span class="report-meta">Generated ${genDate} • ${rep.total_hours || 0} hrs • ${rep.total_units || 0} units</span>
+          </div>
+          <div class="report-actions">
+            <a class="action-link report-csv-link" href="#" data-start="${rep.range_start}" data-end="${rep.range_end}"><i data-lucide="download"></i> CSV</a>
+            <button class="action-icon-btn report-view-btn" title="View report" data-start="${rep.range_start}" data-end="${rep.range_end}"><i data-lucide="eye"></i></button>
+          </div>
+        </div>
+      `;
+      listEl.insertAdjacentHTML('beforeend', itemHtml);
+    });
+
+    // View: recompile that range and show the modal (without re-saving history)
+    listEl.querySelectorAll('.report-view-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        this.selectedStartDate = btn.getAttribute('data-start');
+        this.selectedEndDate = btn.getAttribute('data-end');
+        this.updateRangeSelectionText();
+        this.renderBillingCalendars();
+        await this.compileBillingReport({ save: false });
+      });
+    });
+
+    // CSV: recompile silently, then trigger the download
+    listEl.querySelectorAll('.report-csv-link').forEach(link => {
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        this.selectedStartDate = link.getAttribute('data-start');
+        this.selectedEndDate = link.getAttribute('data-end');
+        await this.compileBillingReport({ save: false, openModal: false });
+        this.downloadCSVReport();
+      });
+    });
+
+    lucide.createIcons();
   }
 
   updateReportTotals(hours, units, mileage) {
@@ -1072,8 +1149,7 @@ class AppController {
 
   // PURE JS DOWNLOADS / EXPORTS
   downloadCSVReport() {
-    const table = document.getElementById('compiled-report-card');
-    if (!table || table.style.display === 'none') return;
+    if (!document.querySelector('#compiled-report-table-body tr')) return;
 
     let csv = [];
     csv.push("Date,Client,Timeslot,Hours,DODD Units,Mileage");
@@ -1334,12 +1410,17 @@ class AppController {
       this.selectedStartDate = null;
       this.selectedEndDate = null;
       this.renderBillingCalendars();
-      document.getElementById('compiled-report-card').style.display = 'none';
     });
 
     document.getElementById('billing-compile-btn').addEventListener('click', () => this.compileBillingReport());
     document.getElementById('billing-download-csv-btn').addEventListener('click', () => this.downloadCSVReport());
     document.getElementById('billing-download-pdf-btn').addEventListener('click', () => this.printPDFReport());
+    document.getElementById('compiled-report-modal-close').addEventListener('click', () => {
+      document.getElementById('compiled-report-modal').classList.remove('active');
+    });
+    document.getElementById('compiled-report-close-btn').addEventListener('click', () => {
+      document.getElementById('compiled-report-modal').classList.remove('active');
+    });
 
     // 5. Settings Actions
     document.getElementById('setting-save-gemini-btn').addEventListener('click', () => {

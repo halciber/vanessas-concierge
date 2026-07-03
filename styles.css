@@ -1050,6 +1050,25 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Wide variant for tabular content (compiled billing report) */
+.modal-content.modal-wide {
+  max-width: 880px;
+}
+
+.compiled-report-scroll {
+  max-height: 55vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 92, 94, 0.4) transparent;
+}
+
+.compiled-report-scroll .data-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  z-index: 1;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

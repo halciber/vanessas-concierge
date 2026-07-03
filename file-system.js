@@ -836,6 +836,63 @@ class FileSystemManager {
   // ----------------------------------------------------
   // Routine Operations
   // ----------------------------------------------------
+  // ----------------------------------------------------
+  // Billing Reports History Operations
+  // ----------------------------------------------------
+  async getReports() {
+    if (this.cloudAvailable) {
+      try {
+        const snapshot = await this.userDocRef.collection('reports').get();
+        const reports = [];
+        snapshot.forEach(doc => reports.push(doc.data()));
+        reports.sort((a, b) => (b.generated_at || '').localeCompare(a.generated_at || ''));
+        return reports;
+      } catch (e) {
+        console.error("Firestore getReports failed:", e);
+      }
+    }
+
+    const reports = [];
+    const files = await this.listFiles(['reports']);
+    const texts = await Promise.all(files.map(file => this.readTextFile(['reports'], file)));
+    files.forEach((file, i) => {
+      const text = texts[i];
+      if (text) {
+        const parsed = this.parseMarkdownWithFrontmatter(text);
+        reports.push({
+          id: file.replace('.md', ''),
+          ...parsed.metadata
+        });
+      }
+    });
+    reports.sort((a, b) => (b.generated_at || '').localeCompare(a.generated_at || ''));
+    return reports;
+  }
+
+  async saveReport(report) {
+    if (this.cloudAvailable) {
+      try {
+        await this.userDocRef.collection('reports').doc(report.id).set(report);
+        return;
+      } catch (e) {
+        console.error("Firestore saveReport failed:", e);
+      }
+    }
+
+    const metadata = {
+      range_start: report.range_start,
+      range_end: report.range_end,
+      generated_at: report.generated_at,
+      total_hours: report.total_hours,
+      total_units: report.total_units,
+      total_mileage: report.total_mileage,
+      entry_count: report.entry_count
+    };
+    const content = `# Billing Report: ${report.range_start} to ${report.range_end}\nCompiled from ${report.entry_count} journal entries.\n`;
+    const fileContent = this.generateMarkdownWithFrontmatter(metadata, content);
+    await this.writeTextFile(['reports'], `${report.id}.md`, fileContent);
+  }
+
   async getRoutine(dayOfWeek) {
     if (this.cloudAvailable) {
       try {
