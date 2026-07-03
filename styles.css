@@ -876,6 +876,23 @@ body {
   overflow-x: auto;
 }
 
+/* Cap the expense table so the whole card stays above the floating AI bar;
+   rows beyond the cap scroll inside the table with a sticky header */
+#page-expenses .data-table-container {
+  overflow-y: auto;
+  max-height: calc(100vh - 600px);
+  min-height: 160px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 92, 94, 0.4) transparent;
+}
+
+#page-expenses .data-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-card, #ffffff);
+  z-index: 1;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
