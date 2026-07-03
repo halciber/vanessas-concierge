@@ -1411,11 +1411,13 @@ body {
   bottom: 72px;
   left: 12px;
   right: 12px;
-  background-color: #ffffff;
+  /* secondary-container from the Serene Aura design system: the AI's voice is
+     lavender on every page, complementing the blush/mint/lavender page tints */
+  background-color: #ead9fe;
   border-radius: var(--rounded-lg);
   padding: 20px 24px;
   box-shadow: var(--shadow-glow-md);
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(102, 89, 120, 0.15);
   display: none;
   flex-direction: column;
   gap: 8px;
@@ -1437,7 +1439,7 @@ body {
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--secondary);
+  color: #6a5d7c; /* on-secondary-container per DESIGN.md */
   display: flex;
   justify-content: space-between;
   align-items: center;

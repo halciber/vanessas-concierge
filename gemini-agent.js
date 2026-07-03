@@ -442,8 +442,9 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
         text = `✨ **(Offline Demo Mode)** I've removed **"${activity}"** from your routine for **${capDay}**.`;
       }
     }
-    // 0.3 Reminder Creation
-    else if (msg.includes("remind") || msg.includes("reminder") || msg.includes("alert")) {
+    // 0.3 Reminder Creation (skip list-intent questions so branch 7.5 can answer them)
+    else if ((msg.includes("remind") || msg.includes("reminder") || msg.includes("alert")) &&
+             !(msg.includes("what") || msg.includes("which") || msg.includes("show") || msg.includes("list") || msg.includes("read") || msg.includes("do i have"))) {
       let textVal = extractQuote(userMessage);
       if (!textVal) {
         textVal = userMessage.replace(/(remind me to|add reminder|create reminder|make a reminder:|make a reminder|add an alert|alert)/gi, '').replace(/[:"']/g, '').trim();
