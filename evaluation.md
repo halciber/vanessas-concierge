@@ -4,9 +4,9 @@ This document maps the technical implementation of **Vanessa's Concierge** to th
 
 ---
 
-## Part 1: Key Course Concepts Demonstrated (Met 5/6)
+## Part 1: Key Course Concepts Demonstrated (Met 6/6)
 
-The competition requires demonstrating at least **three (3) key concepts** from the course. Vanessa's Concierge successfully integrates **five (5)**:
+The competition requires demonstrating at least **three (3) key concepts** from the course. Vanessa's Concierge successfully integrates **six (6)**:
 
 ### 1. Agent & Function Calling (ADK)
 The core of the application is a natural language Care Assistant that coordinates Vanessa's day. It parses user intent (both text and voice) and triggers discrete operations via Gemini function calling.
@@ -21,17 +21,22 @@ During development, the project utilized the `firebase-mcp-server` to interact w
 * **Workspace Initialization:** Executed the `firebase_init` tool to set up Firebase Hosting rules and single-page app rewrites.
 * **Hosting Deployment:** Deployed the project using `firebase_deploy` to make it accessible to judges.
 
-### 3. Security Features
+### 3. Antigravity Agentic IDE Environment
+The application was built collaboratively using the Antigravity Agentic IDE framework. 
+* **Autonomous Execution & Code Modification:** We leveraged Antigravity's autonomous terminal execution (`run_command`) and precision text replace tools (`replace_file_content` and `multi_replace_file_content`) to edit app files and orchestrate local servers without manual file churn.
+* **Browser Verification Subagents:** We used the Antigravity `browser_subagent` to spin up headless Chrome sessions, navigate to localhost and live domains, take screenshots, check DOM trees, inspect console logs, and verify that visual components like the microphone button and modal transitions rendered correctly.
+
+### 4. Security Features
 To ensure the privacy of Vanessa's cloud data and prevent security vulnerabilities:
 * **No Hardcoded Keys:** Gemini API keys are never hardcoded. They are input via the UI Settings panel ([index.html](file:///c:/_working/Vanessas_Apps/Concierge/index.html) lines 354–370) and stored in the browser's secure `localStorage` ([app.js](file:///c:/_working/Vanessas_Apps/Concierge/app.js) lines 1280–1299 and [gemini-agent.js](file:///c:/_working/Vanessas_Apps/Concierge/gemini-agent.js) lines 228–235).
 * **Secure Google Authentication:** Uses OAuth 2.0 Web Client authentication to access Google Calendar and Tasks ([google-api.js](file:///c:/_working/Vanessas_Apps/Concierge/google-api.js) lines 14–61) without storing refresh tokens on the server.
 * **Secure Cloud Synced database:** Syncs with Firebase Auth and Firestore ([file-system.js](file:///c:/_working/Vanessas_Apps/Concierge/file-system.js) and [app.js](file:///c:/_working/Vanessas_Apps/Concierge/app.js) lines 1506–1540) to protect journals and financial records.
 
-### 4. Deployability
+### 5. Deployability
 * **Live Link:** [https://vanessa-s-concierge.web.app](https://vanessa-s-concierge.web.app)
 * **Configuration:** [firebase.json](file:///c:/_working/Vanessas_Apps/Concierge/firebase.json) and [.firebaserc](file:///c:/_working/Vanessas_Apps/Concierge/.firebaserc) in the project root configure single-page app redirects and ignore build scripts.
 
-### 5. Agent Skills (Local CLI Server)
+### 6. Agent Skills (Local CLI Server)
 * **File File System APIs:** [server.py](file:///c:/_working/Vanessas_Apps/Concierge/server.py) implements local API endpoints (`/api/list-files`, `/api/write-file`, `/api/delete-file` on lines 9–108) to support local storage read/writes during offline development.
 
 ---
