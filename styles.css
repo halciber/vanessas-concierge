@@ -876,12 +876,26 @@ body {
   overflow-x: auto;
 }
 
-/* Cap the expense table so the whole card stays above the floating AI bar;
-   rows beyond the cap scroll inside the table with a sticky header */
-#page-expenses .data-table-container {
+/* The expenses page fills the visible area (main-content reserves 120px for
+   the floating AI bar) and the table card flexes to the remaining height, so
+   extra rows scroll inside the table instead of running under the AI bar */
+#page-expenses.active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.expense-table-card {
+  flex: 1;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.expense-table-card .data-table-container {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  max-height: calc(100vh - 600px);
-  min-height: 160px;
   scrollbar-width: thin;
   scrollbar-color: rgba(102, 92, 94, 0.4) transparent;
 }
