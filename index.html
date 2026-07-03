@@ -285,6 +285,36 @@
       </div>
 
       <div class="billing-grid">
+        <!-- Sidebar Column: Generated Reports History (mirrors Past Journals) -->
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 20px;"><i data-lucide="history"></i> Reports History</h3>
+          <div class="reports-list" id="generated-reports-history-list">
+            <!-- Simulated list of generated documents -->
+            <div class="report-item">
+              <div class="report-details">
+                <span class="report-name">DODD Upload File - Oct 2023</span>
+                <span class="report-meta">Generated on Oct 25, 2023 • 142 hours total</span>
+              </div>
+              <div class="report-actions">
+                <a class="action-link" href="#"><i data-lucide="download"></i> Download CSV</a>
+                <button class="action-icon-btn"><i data-lucide="eye"></i></button>
+              </div>
+            </div>
+            <div class="report-item">
+              <div class="report-details">
+                <span class="report-name">Hours Worked Summary - Week 42</span>
+                <span class="report-meta">Generated on Oct 22, 2023 • 38.5 hours</span>
+              </div>
+              <div class="report-actions">
+                <a class="action-link" href="#"><i data-lucide="download"></i> Download PDF</a>
+                <button class="action-icon-btn"><i data-lucide="eye"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Column: date selection and compiled results -->
+        <div class="billing-main-column">
         <!-- Date Selector Card -->
         <div class="card">
           <h3 class="card-title" style="margin-bottom: 12px;">Select the dates to bill for</h3>
@@ -364,32 +394,6 @@
           </div>
         </div>
 
-        <!-- Generated Reports Logs -->
-        <div class="card">
-          <h3 class="card-title">Generated Reports History</h3>
-          <div class="reports-list" id="generated-reports-history-list">
-            <!-- Simulated list of generated documents -->
-            <div class="report-item">
-              <div class="report-details">
-                <span class="report-name">DODD Upload File - Oct 2023</span>
-                <span class="report-meta">Generated on Oct 25, 2023 • 142 hours total</span>
-              </div>
-              <div class="report-actions">
-                <a class="action-link" href="#"><i data-lucide="download"></i> Download CSV</a>
-                <button class="action-icon-btn"><i data-lucide="eye"></i></button>
-              </div>
-            </div>
-            <div class="report-item">
-              <div class="report-details">
-                <span class="report-name">Hours Worked Summary - Week 42</span>
-                <span class="report-meta">Generated on Oct 22, 2023 • 38.5 hours</span>
-              </div>
-              <div class="report-actions">
-                <a class="action-link" href="#"><i data-lucide="download"></i> Download PDF</a>
-                <button class="action-icon-btn"><i data-lucide="eye"></i></button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

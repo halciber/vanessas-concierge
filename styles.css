@@ -1080,10 +1080,19 @@ body {
 /* ----------------------------------------------------
    BILLING REPORT GENERATOR
    ---------------------------------------------------- */
+/* Sidebar-left layout, mirroring .journal-layout on the Daily Journal page */
 .billing-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.billing-main-column {
+  display: flex;
+  flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
 .calendar-select-row {
@@ -1164,14 +1173,21 @@ body {
 .reports-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(102, 92, 94, 0.4) transparent;
 }
 
+/* Stacked layout to fit the narrow sidebar column */
 .report-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
   border: 1px solid rgba(102, 92, 94, 0.06);
   border-radius: var(--rounded-md);
   background-color: #ffffff;
@@ -1580,6 +1596,12 @@ body {
     grid-template-columns: 1fr;
   }
   .journal-sidebar-list {
+    max-height: 250px;
+  }
+  .billing-grid {
+    grid-template-columns: 1fr;
+  }
+  .reports-list {
     max-height: 250px;
   }
 }
