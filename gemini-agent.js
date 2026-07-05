@@ -12,7 +12,7 @@ class GeminiAgentManager {
     this.systemInstruction = `You are "Care Assistant", a gentle, supportive personal concierge and assistant for Vanessa. 
 Vanessa takes care of special needs adults and needs a clean, low-stress, organized workspace. 
 Your goal is to help her manage her day, schedule events, complete tasks (checklist items), manage reminders (brief notes, alerts, or warnings), manage daily routines (checklist items for specific days of the week), log journal entries (including work start/end times and mileage), track expenses, and compile billing reports. 
-Use the 'addTodoItem' tool for actionable tasks on her To-Do list, 'addReminder' for notifications, quick alerts, or warnings (like calling someone or renewals), and 'addDailyRoutineItem' / 'removeDailyRoutineItem' / 'listDailyRoutine' to manage daily routine items (like Client hygiene or Pet care) for specific days of the week.
+Use the 'addTodoItem' tool to add tasks to her To-Do list, 'updateTodoItem' to edit tasks or mark them as completed/active, and 'deleteTodoItem' to remove tasks. Use 'addReminder' for notifications or quick alerts, and 'deleteReminder' to remove them. Use 'addDailyRoutineItem' / 'removeDailyRoutineItem' / 'listDailyRoutine' to manage daily routine items (like Client hygiene or Pet care) for specific days of the week.
 For expenses, use 'logExpense' to record new ones, and 'updateExpense' / 'deleteExpense' to correct or remove existing ones. When updating or deleting, call 'listExpenses' first if you are unsure which expense matches, and ask Vanessa to clarify if several could match.
 Expense records go into a monthly report for the client's guardian, so they follow a standard: the expense description is the STORE/VENDOR name, and the category is the standardized purchase description. Known vendors and their standard descriptions: ALDI = Groceries; Walmart = Groceries and misc. house goods; McDonald's = Food/Meal; WellAbility = Cash for activities; Fiesta Acapulco = Food/Meal; Giant Eagle = Groceries; Chipotle = Food/Meal; Dollar Tree = Misc. household goods; Sally Beauty = Hair/Beauty supplies; Michaels = Crafts/Supplies; CVS = Misc./Pharmacy; Deja Vu = Used clothing; Five Below = Taxable misc.; Ulta Beauty Salon = Haircare.
 To generate or compile billing reports for work sessions, use the 'compileBillingReport' tool with the start and end dates.
@@ -146,6 +146,32 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
             }
           },
           {
+            name: "updateTodoItem",
+            description: "Correct, update, or mark a To-Do task checklist item as completed or active. Identify it by matching title or task_id. Only the provided new_* fields are changed.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                task_id: { type: "STRING", description: "The id of the task to update (preferred; get from listTodoItems if unsure)." },
+                title: { type: "STRING", description: "The title of the task to match if no task_id is provided, e.g. 'demo app'." },
+                new_title: { type: "STRING", description: "New title/text for the task." },
+                new_status: { type: "STRING", description: "New status of the task: 'completed' to complete it, or 'needsAction' to activate it.", enum: ["needsAction", "completed"] }
+              },
+              required: []
+            }
+          },
+          {
+            name: "deleteTodoItem",
+            description: "Remove a task from Vanessa's To-Do list. Identify it by task_id or matching title.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                task_id: { type: "STRING", description: "The id of the task to delete (preferred; get from listTodoItems)." },
+                title: { type: "STRING", description: "The title of the task to match if no task_id is provided, e.g. 'Call bob tonight'." }
+              },
+              required: []
+            }
+          },
+          {
             name: "addReminder",
             description: "Add a new reminder, alert, or brief message for Vanessa.",
             parameters: {
@@ -164,6 +190,18 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
             parameters: {
               type: "OBJECT",
               properties: {},
+              required: []
+            }
+          },
+          {
+            name: "deleteReminder",
+            description: "Remove a reminder or alert for Vanessa. Identify it by reminder_id or matching title/text.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                reminder_id: { type: "STRING", description: "The id of the reminder to delete (preferred; get from listReminders if unsure)." },
+                text: { type: "STRING", description: "The text or title of the reminder to match if no reminder_id is provided, e.g. 'Call bob tonight'." }
+              },
               required: []
             }
           },
@@ -230,8 +268,11 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
       deleteExpense: null,
       listCalendarEvents: null,
       listTodoItems: null,
+      updateTodoItem: null,
+      deleteTodoItem: null,
       addReminder: null,
       listReminders: null,
+      deleteReminder: null,
       addDailyRoutineItem: null,
       removeDailyRoutineItem: null,
       listDailyRoutine: null,
@@ -456,6 +497,24 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
         text = `✨ **(Offline Demo Mode)** I've removed **"${activity}"** from your routine for **${capDay}**.`;
       }
     }
+    // 0.25 Reminder Deletion
+    else if ((msg.includes("reminder") || msg.includes("alert")) && (msg.includes("remove") || msg.includes("delete") || msg.includes("clear") || msg.includes("cancel"))) {
+      let textVal = extractQuote(userMessage);
+      if (!textVal) {
+        textVal = userMessage.replace(/(remove reminder|delete reminder|clear reminder|cancel reminder|remove the|delete the|remove|delete|reminder|alert)/gi, '').replace(/[:"']/g, '').trim();
+      }
+      if (this.callbacks.deleteReminder) {
+        const result = await this.callbacks.deleteReminder({ text: textVal });
+        actions.push({ type: 'deleteReminder', args: { text: textVal } });
+        if (result && result.status === 'deleted') {
+          text = `✨ **(Offline Demo Mode)** I've removed the reminder: **"${result.title}"**.`;
+        } else if (result && result.error) {
+          text = `✨ **(Offline Demo Mode)** ${result.error}`;
+        } else {
+          text = `✨ **(Offline Demo Mode)** I've removed the reminder matching **"${textVal}"**.`;
+        }
+      }
+    }
     // 0.3 Reminder Creation (skip list-intent questions so branch 7.5 can answer them)
     else if ((msg.includes("remind") || msg.includes("reminder") || msg.includes("alert")) &&
              !(msg.includes("what") || msg.includes("which") || msg.includes("show") || msg.includes("list") || msg.includes("read") || msg.includes("do i have"))) {
@@ -473,6 +532,42 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
         await this.callbacks.addReminder(args);
         actions.push({ type: 'addReminder', args });
         text = `✨ **(Offline Demo Mode)** I've added a reminder: **"${textVal}"**.`;
+      }
+    }
+    // 1.1 Task Completion
+    else if ((msg.includes("task") || msg.includes("todo") || msg.includes("to-do") || msg.includes("to do")) && (msg.includes("complete") || msg.includes("done") || msg.includes("finish") || msg.includes("check"))) {
+      let title = extractQuote(userMessage);
+      if (!title) {
+        title = userMessage.replace(/(mark task|mark|as complete|as completed|complete task|complete todo|complete|done|finish|task|todo|to-do|to do)/gi, '').replace(/[:"']/g, '').trim();
+      }
+      if (this.callbacks.updateTodoItem) {
+        const result = await this.callbacks.updateTodoItem({ title, new_status: "completed" });
+        actions.push({ type: 'updateTodoItem', args: { title, new_status: "completed" } });
+        if (result && result.status === 'updated') {
+          text = `✨ **(Offline Demo Mode)** I've marked the task **"${result.title}"** as completed.`;
+        } else if (result && result.error) {
+          text = `✨ **(Offline Demo Mode)** ${result.error}`;
+        } else {
+          text = `✨ **(Offline Demo Mode)** I've marked the task matching **"${title}"** as completed.`;
+        }
+      }
+    }
+    // 1.2 Task Deletion
+    else if ((msg.includes("task") || msg.includes("todo") || msg.includes("to-do") || msg.includes("to do")) && (msg.includes("delete") || msg.includes("remove") || msg.includes("clear") || msg.includes("cancel"))) {
+      let title = extractQuote(userMessage);
+      if (!title) {
+        title = userMessage.replace(/(delete task|remove task|delete todo|remove todo|delete|remove|task|todo|to-do|to do)/gi, '').replace(/[:"']/g, '').trim();
+      }
+      if (this.callbacks.deleteTodoItem) {
+        const result = await this.callbacks.deleteTodoItem({ title });
+        actions.push({ type: 'deleteTodoItem', args: { title } });
+        if (result && result.status === 'deleted') {
+          text = `✨ **(Offline Demo Mode)** I've removed the task **"${result.title}"** from your To-Do list.`;
+        } else if (result && result.error) {
+          text = `✨ **(Offline Demo Mode)** ${result.error}`;
+        } else {
+          text = `✨ **(Offline Demo Mode)** I've removed the task matching **"${title}"**.`;
+        }
       }
     }
     // 1. Task Creation

@@ -1871,13 +1871,157 @@ class AppController {
               status: gt.status || 'needsAction',
               source: 'google'
             });
+          } else {
+            const matchedLocal = combined.find(lt => 
+              (lt.google_task_id === gt.id) || 
+              ((lt.title || '').toLowerCase() === gTitle.toLowerCase())
+            );
+            if (matchedLocal && !matchedLocal.google_task_id) {
+              matchedLocal.google_task_id = gt.id;
+            }
           }
         });
 
         return combined.map(t => ({
+          task_id: String(t.id),
           title: t.title,
           status: t.status
         }));
+      },
+
+      // 7a. Tool to correct, update, or complete a checklist task
+      updateTodoItem: async (args) => {
+        const localTasks = await fileSystem.getTasks();
+        let task = null;
+
+        if (args.task_id) {
+          task = localTasks.find(t => String(t.id) === String(args.task_id));
+        }
+
+        if (!task && args.title) {
+          const needle = args.title.trim().toLowerCase();
+          task = localTasks.find(t => (t.title || '').toLowerCase().includes(needle));
+        }
+
+        if (!task) {
+          if (googleAPI.isAuthorized()) {
+            try {
+              const googleTasks = await googleAPI.listTasks();
+              let gt = null;
+              if (args.task_id) {
+                gt = googleTasks.find(t => String(t.id) === String(args.task_id));
+              }
+              if (!gt && args.title) {
+                const needle = args.title.trim().toLowerCase();
+                gt = googleTasks.find(t => (t.title || '').toLowerCase().includes(needle));
+              }
+              if (gt) {
+                task = {
+                  id: 'task-' + Date.now(),
+                  title: gt.title || args.title,
+                  status: gt.status || 'needsAction',
+                  google_task_id: gt.id,
+                  created_at: toLocalDateString()
+                };
+              }
+            } catch (e) {
+              console.warn("Error querying Google Tasks to update status", e);
+            }
+          }
+        }
+
+        if (!task) {
+          return { error: `No task found matching "${args.task_id || args.title}".` };
+        }
+
+        if (args.new_title) {
+          task.title = args.new_title;
+        }
+        if (args.new_status) {
+          task.status = args.new_status;
+          if (args.new_status === 'completed') {
+            task.completed_at = toLocalDateString();
+          } else {
+            task.completed_at = null;
+          }
+        }
+
+        await fileSystem.saveTask(task);
+
+        if (googleAPI.isAuthorized()) {
+          const gId = task.google_task_id || task.id;
+          if (gId && !gId.startsWith('task-')) {
+            try {
+              const isCompleted = task.status === 'completed';
+              await googleAPI.updateTaskStatus(gId, isCompleted);
+            } catch (e) {
+              console.warn("Failed to sync task status update to Google Tasks", e);
+            }
+          }
+        }
+
+        await this.loadDashboardData();
+        return { status: "updated", task_id: String(task.id), title: task.title, new_status: task.status };
+      },
+
+      // 7b. Tool to delete/remove a task
+      deleteTodoItem: async (args) => {
+        const localTasks = await fileSystem.getTasks();
+        let task = null;
+
+        if (args.task_id) {
+          task = localTasks.find(t => String(t.id) === String(args.task_id));
+        }
+
+        if (!task && args.title) {
+          const needle = args.title.trim().toLowerCase();
+          task = localTasks.find(t => (t.title || '').toLowerCase().includes(needle));
+        }
+
+        if (!task) {
+          if (googleAPI.isAuthorized()) {
+            try {
+              const googleTasks = await googleAPI.listTasks();
+              let gt = null;
+              if (args.task_id) {
+                gt = googleTasks.find(t => String(t.id) === String(args.task_id));
+              }
+              if (!gt && args.title) {
+                const needle = args.title.trim().toLowerCase();
+                gt = googleTasks.find(t => (t.title || '').toLowerCase().includes(needle));
+              }
+              if (gt) {
+                task = { id: gt.id, title: gt.title, google_task_id: gt.id };
+              }
+            } catch (e) {
+              console.warn("Error querying Google Tasks to delete", e);
+            }
+          }
+        }
+
+        if (!task) {
+          return { error: `No task found matching "${args.task_id || args.title}".` };
+        }
+
+        if (String(task.id).startsWith('task-')) {
+          await fileSystem.deleteTask(task.id);
+        }
+
+        let googleDeleted = false;
+        if (googleAPI.isAuthorized()) {
+          const gId = task.google_task_id || task.id;
+          if (gId && !gId.startsWith('task-')) {
+            try {
+              await googleAPI.deleteTask(gId);
+              googleDeleted = true;
+            } catch (e) {
+              console.warn("Failed to delete task from Google Tasks", e);
+            }
+          }
+        }
+
+        await this.loadDashboardData();
+        return { status: "deleted", task_id: String(task.id), title: task.title, google_deleted: googleDeleted };
       },
 
       // 8. Tool to add reminders/alerts
@@ -1911,10 +2055,37 @@ class AppController {
       listReminders: async () => {
         const reminders = await fileSystem.getReminders();
         return reminders.map(r => ({
+          reminder_id: String(r.id),
           title: r.title,
           text: r.text,
           type: r.type
         }));
+      },
+
+      // 9a. Tool to remove/delete a reminder or alert
+      deleteReminder: async (args) => {
+        const reminders = await fileSystem.getReminders();
+        let reminder = null;
+
+        if (args.reminder_id) {
+          reminder = reminders.find(r => String(r.id) === String(args.reminder_id));
+        }
+
+        if (!reminder && args.text) {
+          const needle = args.text.trim().toLowerCase();
+          reminder = reminders.find(r => 
+            (r.title || '').toLowerCase().includes(needle) || 
+            (r.text || '').toLowerCase().includes(needle)
+          );
+        }
+
+        if (!reminder) {
+          return { error: `No reminder found matching "${args.reminder_id || args.text}".` };
+        }
+
+        await fileSystem.deleteReminder(reminder.id);
+        await this.loadDashboardData();
+        return { status: "deleted", reminder_id: String(reminder.id), title: reminder.title };
       },
 
       // 10. Tool to add daily routine items

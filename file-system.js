@@ -69,18 +69,25 @@ class FileSystemManager {
       console.error("Failed to initialize Firebase:", e);
     }
 
-    // Check if python server is running (fallback only)
-    try {
-      const resp = await fetch('/api/list-files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pathArray: ['tasks'] })
-      });
-      if (resp.status === 200) {
-        this.serverAvailable = true;
-        console.log("Connected to Concierge Python server.");
+    // Check if python server is running (fallback only for local development)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      try {
+        const resp = await fetch('/api/list-files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pathArray: ['tasks'] })
+        });
+        if (resp.status === 200) {
+          const contentType = resp.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            this.serverAvailable = true;
+            console.log("Connected to Concierge Python server.");
+          }
+        }
+      } catch (e) {
+        this.serverAvailable = false;
       }
-    } catch (e) {
+    } else {
       this.serverAvailable = false;
     }
   }
