@@ -271,6 +271,7 @@ class AppController {
 
         this.showToast(!wasCompleted ? "Event marked complete!" : "Event marked active");
         await this.loadDashboardData();
+        await this.verifyUIUpdate('toggle-event', id, { completed: !wasCompleted });
       });
     });
 
@@ -360,7 +361,9 @@ class AppController {
         }
 
         this.showToast("Task completed!");
-        setTimeout(() => this.loadDashboardData(), 300);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await this.loadDashboardData();
+        await this.verifyUIUpdate('update-task', id, { status: 'completed' });
       });
     });
 
@@ -437,6 +440,7 @@ class AppController {
             await fileSystem.saveRoutine(todayDayName, routines);
             this.showToast(`Routine: "${routines[idx].activity}" updated!`);
             await this.loadDashboardData();
+            await this.verifyUIUpdate('toggle-routine', null, { activity: routines[idx].activity, completed: routines[idx].completed });
           });
         });
       }
@@ -716,6 +720,7 @@ class AppController {
     
     // Refresh sidebar to reflect any metadata changes
     await this.loadPastJournalsSidebar();
+    await this.verifyUIUpdate('save-journal', entryId);
   }
 
   async loadJournalHistory() {
@@ -839,9 +844,11 @@ class AppController {
     });
     tableBody.querySelectorAll('.expense-delete-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const removed = await fileSystem.deleteExpense(btn.getAttribute('data-id'));
+        const id = btn.getAttribute('data-id');
+        const removed = await fileSystem.deleteExpense(id);
         this.showToast(removed ? `Deleted "${removed.description}"` : 'Expense not found');
         await this.loadExpensesData();
+        await this.verifyUIUpdate('delete-expense', id);
       });
     });
 
@@ -902,6 +909,7 @@ class AppController {
       return;
     }
 
+    const savedId = this.editingExpenseId;
     if (this.editingExpenseId) {
       await fileSystem.updateExpense(this.editingExpenseId, {
         date,
@@ -912,8 +920,15 @@ class AppController {
       });
       this.editingExpenseId = null;
       this.showToast("Expense updated!");
+      
+      // Close Modal and Refresh
+      document.getElementById('add-expense-modal').classList.remove('active');
+      await this.loadExpensesData();
+      await this.verifyUIUpdate('update-expense', savedId, { status });
     } else {
+      const expenseId = 'exp-' + Date.now();
       await fileSystem.addExpense({
+        id: expenseId,
         date,
         description: desc,
         category,
@@ -921,11 +936,12 @@ class AppController {
         status
       });
       this.showToast("Expense recorded!");
+      
+      // Close Modal and Refresh
+      document.getElementById('add-expense-modal').classList.remove('active');
+      await this.loadExpensesData();
+      await this.verifyUIUpdate('add-expense', expenseId, { status });
     }
-
-    // Close Modal and Refresh
-    document.getElementById('add-expense-modal').classList.remove('active');
-    await this.loadExpensesData();
   }
 
   // ----------------------------------------------------
@@ -1623,6 +1639,7 @@ class AppController {
           }
         }
         await this.loadDashboardData();
+        await this.verifyUIUpdate('add-task', taskId, { title });
         return { task_id: taskId, google_id: googleId, status: "created", title };
       },
 
@@ -1655,6 +1672,7 @@ class AppController {
           }
         }
         await this.loadDashboardData();
+        await this.verifyUIUpdate('add-event', eventId, { summary: args.summary });
         return { event_id: eventId, google_id: googleId, status: "created", summary: args.summary };
       },
 
@@ -1684,6 +1702,7 @@ class AppController {
         if (localToDelete) {
           await fileSystem.deleteEvent(localToDelete.id);
           await this.loadDashboardData();
+          await this.verifyUIUpdate('delete-event', localToDelete.id, { summary: localToDelete.summary });
           return { status: "deleted_locally_and_google", event_title: localToDelete.summary, google_deleted: googleDeleted };
         } else if (googleDeleted) {
           await this.loadDashboardData();
@@ -1730,6 +1749,7 @@ class AppController {
         this.currentJournalId = entryId;
         this.currentJournalDate = dateStr;
 
+        await this.verifyUIUpdate('save-journal', entryId);
         return { status: "logged_and_saved", client: metadata.client, hours: `${startInput.value}-${endInput.value}`, units, mileage: metadata.mileage };
       },
 
@@ -1744,8 +1764,10 @@ class AppController {
         const paymentMethod = args.payment_method || 'Debit';
 
         const todayStr = toLocalDateString();
+        const expenseId = 'exp-' + Date.now();
 
         await fileSystem.addExpense({
+          id: expenseId,
           date: todayStr,
           description: desc,
           category,
@@ -1754,7 +1776,8 @@ class AppController {
         });
 
         await this.loadExpensesData();
-        return { status: "logged", description: desc, amount: amt, date: todayStr, payment_method: paymentMethod };
+        await this.verifyUIUpdate('add-expense', expenseId, { status: paymentMethod });
+        return { status: "logged", expense_id: expenseId, description: desc, amount: amt, date: todayStr, payment_method: paymentMethod };
       },
 
       // 5a. Tool to list recorded expenses
@@ -1787,6 +1810,7 @@ class AppController {
 
         const updated = await fileSystem.updateExpense(match.expense.id, updates);
         await this.loadExpensesData();
+        await this.verifyUIUpdate('update-expense', updated.id, { status: updated.status });
         return { status: "updated", expense_id: String(updated.id), date: updated.date, description: updated.description, category: updated.category, amount: updated.amount, payment_status: updated.status };
       },
 
@@ -1798,6 +1822,7 @@ class AppController {
         const removed = await fileSystem.deleteExpense(match.expense.id);
         await this.loadExpensesData();
         if (!removed) return { error: "The expense could not be deleted." };
+        await this.verifyUIUpdate('delete-expense', match.expense.id);
         return { status: "deleted", description: removed.description, amount: removed.amount, date: removed.date };
       },
 
@@ -1961,6 +1986,7 @@ class AppController {
         }
 
         await this.loadDashboardData();
+        await this.verifyUIUpdate('update-task', task.id, { status: task.status });
         return { status: "updated", task_id: String(task.id), title: task.title, new_status: task.status };
       },
 
@@ -2021,6 +2047,7 @@ class AppController {
         }
 
         await this.loadDashboardData();
+        await this.verifyUIUpdate('delete-task', task.id);
         return { status: "deleted", task_id: String(task.id), title: task.title, google_deleted: googleDeleted };
       },
 
@@ -2048,6 +2075,7 @@ class AppController {
         }
 
         await this.loadDashboardData();
+        await this.verifyUIUpdate('add-reminder', reminderId, { text: args.text });
         return { reminder_id: reminderId, status: "created", title: localReminder.title, text: localReminder.text, synced_to_google_tasks: syncedToGoogle };
       },
 
@@ -2085,6 +2113,7 @@ class AppController {
 
         await fileSystem.deleteReminder(reminder.id);
         await this.loadDashboardData();
+        await this.verifyUIUpdate('delete-reminder', reminder.id, { text: reminder.text });
         return { status: "deleted", reminder_id: String(reminder.id), title: reminder.title };
       },
 
@@ -2101,6 +2130,9 @@ class AppController {
           await fileSystem.saveRoutine(day, items);
         }
         await this.loadDashboardData();
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const todayDayName = daysOfWeek[new Date().getDay()].toLowerCase();
+        await this.verifyUIUpdate('add-routine', null, { dayOfWeek: day, activity, isToday: (day === todayDayName) });
         return { status: "success", dayOfWeek: day, activity, total_items: items.length };
       },
 
@@ -2117,6 +2149,9 @@ class AppController {
           await fileSystem.saveRoutine(day, filtered);
         }
         await this.loadDashboardData();
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const todayDayName = daysOfWeek[new Date().getDay()].toLowerCase();
+        await this.verifyUIUpdate('remove-routine', null, { dayOfWeek: day, activity, isToday: (day === todayDayName) });
         return { status: "success", dayOfWeek: day, activity, total_items: filtered.length, removed: items.length - filtered.length };
       },
 
@@ -2347,6 +2382,190 @@ class AppController {
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`([^`]+)`/g, '<code>$1</code>')
       .replace(/\n/g, '<br>');
+  }
+
+  // Robustly verifies that a UI update (add, update, delete) is properly rendered in the DOM
+  async verifyUIUpdate(type, itemId, details = {}) {
+    const maxRetries = 5;
+    const delayMs = 150;
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const todayDayName = daysOfWeek[new Date().getDay()].toLowerCase();
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      // 1. Force reload the appropriate UI data model
+      if (['add-task', 'update-task', 'delete-task', 'add-event', 'delete-event', 'add-reminder', 'delete-reminder', 'add-routine', 'remove-routine', 'toggle-event', 'toggle-routine'].includes(type)) {
+        await this.loadDashboardData();
+      } else if (['add-expense', 'update-expense', 'delete-expense'].includes(type)) {
+        await this.loadExpensesData();
+      } else if (['save-journal'].includes(type)) {
+        await this.loadPastJournalsSidebar();
+      }
+
+      // 2. Perform DOM checks
+      let success = false;
+      switch (type) {
+        case 'toggle-event': {
+          const container = document.getElementById('dashboard-schedule');
+          const checkEl = container ? container.querySelector(`.schedule-check[data-id="${itemId}"]`) : null;
+          if (checkEl) {
+            const hasCompletedClass = checkEl.classList.contains('completed');
+            success = (details.completed === hasCompletedClass);
+          }
+          break;
+        }
+        case 'toggle-routine': {
+          const routineGrid = document.querySelector('.routine-grid');
+          if (routineGrid && details.activity) {
+            const items = Array.from(routineGrid.querySelectorAll('.routine-item'));
+            const matchedItem = items.find(item => {
+              const titleEl = item.querySelector('.routine-title');
+              return titleEl && titleEl.textContent.trim().toLowerCase() === details.activity.toLowerCase();
+            });
+            if (matchedItem) {
+              const statusEl = matchedItem.querySelector('.routine-status');
+              const isCompletedInUI = statusEl && statusEl.textContent.trim().toLowerCase() === 'completed';
+              success = (details.completed === isCompletedInUI);
+            }
+          }
+          break;
+        }
+        case 'add-task': {
+          const container = document.getElementById('dashboard-tasks');
+          const item = container ? container.querySelector(`.task-item[data-id="${itemId}"]`) : null;
+          if (item) {
+            success = true;
+          } else if (container && details.title) {
+            const texts = Array.from(container.querySelectorAll('.task-text')).map(el => el.textContent.trim().toLowerCase());
+            if (texts.some(t => t.includes(details.title.toLowerCase()))) {
+              success = true;
+            }
+          }
+          break;
+        }
+        case 'update-task': {
+          const container = document.getElementById('dashboard-tasks');
+          const item = container ? container.querySelector(`.task-item[data-id="${itemId}"]`) : null;
+          if (details.status === 'completed') {
+            // Completed tasks must be absent from the incomplete dashboard list
+            success = !item;
+          } else {
+            // Active tasks must be present
+            success = !!item;
+          }
+          break;
+        }
+        case 'delete-task': {
+          const container = document.getElementById('dashboard-tasks');
+          const item = container ? container.querySelector(`.task-item[data-id="${itemId}"]`) : null;
+          success = !item;
+          break;
+        }
+        case 'add-event': {
+          const schedContainer = document.getElementById('dashboard-schedule');
+          const upcContainer = document.getElementById('dashboard-upcoming');
+          const itemInSched = schedContainer ? schedContainer.querySelector(`.schedule-check[data-id="${itemId}"]`) : null;
+          const itemInUpc = upcContainer ? Array.from(upcContainer.querySelectorAll('.upcoming-title')).some(el => el.textContent.trim().toLowerCase() === (details.summary || '').toLowerCase()) : false;
+          
+          if (itemInSched || itemInUpc) {
+            success = true;
+          } else {
+            // If the event date is not today/upcoming, check in database to verify it saved
+            const events = await fileSystem.getEvents();
+            success = events.some(e => String(e.id) === String(itemId) || (e.summary || '').toLowerCase() === (details.summary || '').toLowerCase());
+          }
+          break;
+        }
+        case 'delete-event': {
+          const schedContainer = document.getElementById('dashboard-schedule');
+          const upcContainer = document.getElementById('dashboard-upcoming');
+          const itemInSched = schedContainer ? schedContainer.querySelector(`.schedule-check[data-id="${itemId}"]`) : null;
+          const itemInUpc = upcContainer ? Array.from(upcContainer.querySelectorAll('.upcoming-card')).some(el => el.querySelector('.upcoming-title')?.textContent.trim().toLowerCase() === (details.summary || '').toLowerCase()) : false;
+          success = !itemInSched && !itemInUpc;
+          break;
+        }
+        case 'add-expense':
+        case 'update-expense': {
+          const container = document.getElementById('expenses-table-body');
+          const item = container ? container.querySelector(`.expense-edit-btn[data-id="${itemId}"]`) : null;
+          if (item) {
+            success = true;
+          } else {
+            // Check if active filter hides it. If filtered out in UI, verify it is present in the database.
+            const filterActive = document.querySelector('.filter-btn.active')?.getAttribute('data-filter') || 'all';
+            if (filterActive !== 'all' && details.status && filterActive.toLowerCase() !== details.status.toLowerCase()) {
+              const expenses = await fileSystem.getExpenses();
+              success = expenses.some(e => String(e.id) === String(itemId));
+            }
+          }
+          break;
+        }
+        case 'delete-expense': {
+          const container = document.getElementById('expenses-table-body');
+          const item = container ? container.querySelector(`.expense-edit-btn[data-id="${itemId}"]`) : null;
+          success = !item;
+          break;
+        }
+        case 'save-journal': {
+          const container = document.getElementById('journal-sidebar-list');
+          const item = container ? container.querySelector(`.journal-sidebar-item[data-id="${itemId}"]`) : null;
+          success = !!item;
+          break;
+        }
+        case 'add-reminder': {
+          const container = document.getElementById('dashboard-reminders');
+          if (container && details.text) {
+            const texts = Array.from(container.querySelectorAll('.reminder-text')).map(el => el.textContent.trim().toLowerCase());
+            success = texts.some(t => t.includes(details.text.toLowerCase()));
+          }
+          break;
+        }
+        case 'delete-reminder': {
+          const container = document.getElementById('dashboard-reminders');
+          if (container && details.text) {
+            const texts = Array.from(container.querySelectorAll('.reminder-text')).map(el => el.textContent.trim().toLowerCase());
+            success = !texts.some(t => t.includes(details.text.toLowerCase()));
+          } else {
+            success = true;
+          }
+          break;
+        }
+        case 'add-routine': {
+          const routineGrid = document.querySelector('.routine-grid');
+          if (details.isToday && routineGrid && details.activity) {
+            const titles = Array.from(routineGrid.querySelectorAll('.routine-title')).map(el => el.textContent.trim().toLowerCase());
+            success = titles.some(t => t === details.activity.toLowerCase());
+          } else {
+            const routines = await fileSystem.getRoutine(details.dayOfWeek);
+            success = routines.some(r => (r.activity || '').toLowerCase() === details.activity.toLowerCase());
+          }
+          break;
+        }
+        case 'remove-routine': {
+          const routineGrid = document.querySelector('.routine-grid');
+          if (details.isToday && routineGrid && details.activity) {
+            const titles = Array.from(routineGrid.querySelectorAll('.routine-title')).map(el => el.textContent.trim().toLowerCase());
+            success = !titles.some(t => t === details.activity.toLowerCase());
+          } else {
+            const routines = await fileSystem.getRoutine(details.dayOfWeek);
+            success = !routines.some(r => (r.activity || '').toLowerCase() === details.activity.toLowerCase());
+          }
+          break;
+        }
+      }
+
+      if (success) {
+        console.log(`UI update verification succeeded for ${type} (ID: ${itemId}) on attempt ${attempt}`);
+        return true;
+      }
+
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+
+    const errMsg = `UI component verification failed for ${type}: database updated, but UI was not reflected.`;
+    console.error(errMsg);
+    throw new Error(errMsg);
   }
 }
 
