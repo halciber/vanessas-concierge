@@ -10,7 +10,7 @@ The competition requires demonstrating at least **three (3) key concepts** from 
 
 ### 1. Agent & Function Calling (ADK)
 The core of the application is a natural language Care Assistant that coordinates Vanessa's day. It parses user intent (both text and voice) and triggers discrete operations via Gemini function calling.
-* **Agent Manager:** [gemini-agent.js](file:///c:/_working/Vanessas_Apps/Concierge/gemini-agent.js) (lines 7–378) defines the system prompt, model settings (`gemini-2.5-flash`), and parses API responses.
+* **Agent Manager:** [gemini-agent.js](file:///c:/_working/Vanessas_Apps/Concierge/gemini-agent.js) (lines 7–380) defines the system prompt, model settings (`gemini-3.5-flash`), and parses API responses.
 * **Function Declarations (Tools):** [gemini-agent.js](file:///c:/_working/Vanessas_Apps/Concierge/gemini-agent.js) (lines 23–206) declares tools for adding tasks, creating calendar events, logging journal entries, recording expenses, listing items, and compiling reports.
 * **Registered UI Callbacks:** [app.js](file:///c:/_working/Vanessas_Apps/Concierge/app.js) (lines 1602–1981) binds these tools to actual UI modifications, page navigation, and database calls.
 * **Offline Mock Parser:** [gemini-agent.js](file:///c:/_working/Vanessas_Apps/Concierge/gemini-agent.js) (lines 380–691) provides a regex-based offline parser that mimics the agent's behavior when no API Key is configured.

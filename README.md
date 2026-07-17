@@ -7,7 +7,7 @@ Vanessa's Concierge is a serene, low-stress, and beautifully organized Single Pa
 ## 🌟 Key Features
 
 1. **AI Care Assistant ("Care Assistant")**
-   - A floating, bottom-docked conversational AI assistant powered by `gemini-2.5-flash`.
+   - A floating, bottom-docked conversational AI assistant powered by `gemini-3.5-flash`.
    - Supports text input and hands-free voice dictation via the **HTML5 Web Speech API** (`SpeechRecognition`), featuring a 3.5-second silence auto-submit.
    - Handles natural language requests to manage checklists, schedule calendar events, log journal entries, record expenses, and compile reports.
    - Fallback offline mock AI parser enables full demonstration of features when no API key is active.

@@ -353,15 +353,32 @@
           <!-- Gemini AI Section -->
           <div class="settings-section">
             <h3 class="card-title" style="margin-bottom: 8px;"><i data-lucide="bot"></i> AI Agent Settings</h3>
-            <div class="settings-row">
+            
+            <div class="settings-row" style="margin-bottom: 16px;">
               <div class="settings-label-wrap">
                 <span class="settings-label">Gemini API Key</span>
                 <span class="settings-desc">Provide your Gemini API key to enable natural language commands.</span>
               </div>
               <div style="display: flex; flex-direction: column; gap: 8px;">
                 <input type="password" class="form-input" id="setting-gemini-key" placeholder="Enter API Key">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                  <button class="btn btn-secondary" id="setting-save-gemini-btn">Save API Key</button>
+              </div>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-label-wrap">
+                <span class="settings-label">Gemini Model</span>
+                <span class="settings-desc">Choose the Gemini model for your Care Assistant.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <select class="form-input" id="setting-gemini-model" style="min-width: 220px; cursor: pointer;">
+                  <option value="gemini-3.5-flash">Gemini 3.5 Flash (Recommended)</option>
+                  <option value="gemini-3.1-pro">Gemini 3.1 Pro</option>
+                  <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                </select>
+                <div style="display: flex; gap: 12px; align-items: center; margin-top: 4px;">
+                  <button class="btn btn-secondary" id="setting-save-gemini-btn">Save Agent Settings</button>
                   <span class="status-badge disconnected" id="gemini-status-badge">
                     <i data-lucide="alert-triangle"></i> Not Configured
                   </span>
@@ -593,10 +610,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <!-- Load Application JavaScripts -->
-  <script src="file-system.js?v=2.0"></script>
-  <script src="google-api.js?v=2.0"></script>
-  <script src="gemini-agent.js?v=2.0"></script>
-  <script src="app.js?v=2.0"></script>
+  <script src="file-system.js?v=2.1"></script>
+  <script src="google-api.js?v=2.1"></script>
+  <script src="gemini-agent.js?v=2.1"></script>
+  <script src="app.js?v=2.1"></script>
 
 </body>
 </html>

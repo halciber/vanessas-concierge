@@ -1295,6 +1295,9 @@ class AppController {
     document.getElementById('setting-gemini-key').value = key;
     this.updateGeminiBadge(key);
 
+    const model = localStorage.getItem('gemini_model_name') || 'gemini-3.5-flash';
+    document.getElementById('setting-gemini-model').value = model;
+
     const clientID = localStorage.getItem('google_client_id') || '';
     document.getElementById('setting-google-id').value = clientID;
     this.updateGoogleBadge();
@@ -1444,9 +1447,11 @@ class AppController {
     // 5. Settings Actions
     document.getElementById('setting-save-gemini-btn').addEventListener('click', () => {
       const val = document.getElementById('setting-gemini-key').value.trim();
+      const model = document.getElementById('setting-gemini-model').value;
       geminiAgent.setApiKey(val);
+      geminiAgent.setModelName(model);
       this.updateGeminiBadge(val);
-      this.showToast("Gemini API Key Saved!");
+      this.showToast("AI Agent Settings Saved!");
     });
 
     document.getElementById('setting-save-google-btn').addEventListener('click', () => {

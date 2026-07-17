@@ -7,7 +7,7 @@
 class GeminiAgentManager {
   constructor() {
     this.apiKey = '';
-    this.modelName = 'gemini-2.5-flash';
+    this.modelName = 'gemini-3.5-flash';
     this.chatHistory = [];
     this.systemInstruction = `You are "Care Assistant", a gentle, supportive personal concierge and assistant for Vanessa. 
 Vanessa takes care of special needs adults and needs a clean, low-stress, organized workspace. 
@@ -282,11 +282,17 @@ Avoid jargon. Keep responses concise and supportive. Always assume the current y
 
   init(apiKey) {
     this.apiKey = apiKey || localStorage.getItem('gemini_api_key') || '';
+    this.modelName = localStorage.getItem('gemini_model_name') || 'gemini-3.5-flash';
   }
 
   setApiKey(apiKey) {
     this.apiKey = apiKey;
     localStorage.setItem('gemini_api_key', apiKey);
+  }
+
+  setModelName(modelName) {
+    this.modelName = modelName;
+    localStorage.setItem('gemini_model_name', modelName);
   }
 
   registerCallbacks(callbacks) {

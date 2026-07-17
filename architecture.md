@@ -24,7 +24,7 @@ graph TD
   end
 
   subgraph GoogleCloud ["Google Cloud Platform"]
-    GeminiAPI["Gemini API<br/>(gemini-2.5-flash)"]
+    GeminiAPI["Gemini API<br/>(gemini-3.5-flash)"]
     GCal["Google Calendar API"]
     GTasks["Google Tasks API"]
   end
@@ -76,7 +76,7 @@ The workspace is organized as a clean, modular Single Page Application (SPA) wit
 
 ### B. Controller & Integration Layer (JavaScript Models)
 * **[app.js](file:///c:/_working/Vanessas_Apps/Concierge/app.js):** Coordinates SPA views, manages system states (date range selection, editing IDs), binds all DOM event listeners, and registers client-side callback tools with the AI Agent (`addTodoItem`, `logExpense`, `compileBillingReport` etc.).
-* **[gemini-agent.js](file:///c:/_working/Vanessas_Apps/Concierge/gemini-agent.js):** The interface to the Gemini API (`gemini-2.5-flash`). Manages system prompts, handles conversational chat histories, registers tool declarations, and implements a regex-based offline parser fallback (`handleLocalMockResponse`) for offline demonstration testing.
+* **[gemini-agent.js](file:///c:/_working/Vanessas_Apps/Concierge/gemini-agent.js):** The interface to the Gemini API (`gemini-3.5-flash`). Manages system prompts, handles conversational chat histories, registers tool declarations, and implements a regex-based offline parser fallback (`handleLocalMockResponse`) for offline demonstration testing.
 * **[file-system.js](file:///c:/_working/Vanessas_Apps/Concierge/file-system.js):** The unified Data Access Object (DAO) wrapper. Dynamically checks if Firebase Cloud Auth is active to sync and read/write records securely with Firestore collections (`users/{uid}/journals`, `tasks`, `expenses`, `reports`), falling back to local `localStorage` for guests, or local Python file system APIs during offline development.
 * **[google-api.js](file:///c:/_working/Vanessas_Apps/Concierge/google-api.js):** Direct browser client that integrates with the Google OAuth 2.0 Web flow. Safely fetches, creates, and deletes live calendar events and tasks from Vanessa's personal Google Account without exposing credentials.
 
